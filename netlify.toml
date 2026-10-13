@@ -1,0 +1,21 @@
+# Sitio estático: no requiere compilación. Publica la raíz del repositorio.
+[build]
+  publish = "."
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# La página siempre se revalida para que los cambios lleguen a los equipos.
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Las bibliotecas llevan versión en el nombre o cambian poco: caché de una semana.
+[[headers]]
+  for = "/vendor/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"

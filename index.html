@@ -3,7 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Actividad guiada: decisiones cromatográficas con evidencia</title>
+<title>Decisiones cromatográficas con evidencia</title>
+<meta name="description" content="Actividad guiada de 90 minutos: predecir, comprobar con un simulador y diagnosticar cromatogramas (HPLC y GC). Al terminar genera el reporte en PDF para Classroom.">
+<meta property="og:title" content="Decisiones cromatográficas con evidencia">
+<meta property="og:description" content="Actividad guiada con simulador de cromatografía. Genera un reporte PDF por equipo.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#2B5E88">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%232B5E88'/%3E%3Cpath d='M3 25h5c2 0 2.5-14 4-14s2 14 4 14 2.5-18 4.5-18S23 25 25 25h4' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet">
@@ -71,7 +77,7 @@ details.step[open] > summary{border-bottom:1px solid var(--line)}
 .field textarea{width:100%;min-height:84px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);resize:vertical}
 .field input[type=text], .field input[type=number]{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper)}
 .field input[type=text]{width:100%}
-.field input[type=number]{width:150px;text-align:right}
+.field input[type=number],.field input.num{width:150px;text-align:right}
 .field .unit{margin-left:8px;color:var(--muted)}
 .field select{padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:var(--paper);max-width:100%}
 .field.missing textarea,.field.missing input,.field.missing select{border-color:var(--bad);border-width:2px}
@@ -147,10 +153,36 @@ canvas{display:block;width:100%}
   .cv-chrom{height:230px}
   h1{font-size:1.5rem}
 }
+/* menú de opciones */
+.menu{position:relative}
+.menu > summary{list-style:none;cursor:pointer;border:1px solid var(--line);background:var(--panel);padding:5px 11px;border-radius:8px;font-size:.9rem}
+.menu > summary::-webkit-details-marker{display:none}
+.menu-pop{position:absolute;right:0;top:calc(100% + 6px);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:6px;min-width:250px;box-shadow:0 8px 24px rgba(0,0,0,.14);z-index:10}
+.menu-pop button{display:block;width:100%;text-align:left;border:0;background:none;padding:8px 10px;border-radius:6px}
+.menu-pop button:hover{background:var(--shade)}
+.menu-pop button.danger{color:var(--bad)}
+.menu-pop small{display:block;color:var(--muted);padding:4px 10px 6px;font-size:.78rem}
+.btn.confirm{background:var(--b);border-color:var(--b);color:#fff}
+.btn[disabled]{opacity:.55;cursor:progress}
+.notice{background:var(--glass-soft);border-radius:8px;padding:10px 14px;margin:12px 0;font-size:.92rem}
+.notice p{margin:0 0 6px}.notice p:last-child{margin:0}
+.deliver{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:14px 0}
+.deliver h3{margin-bottom:6px}
+.deliver .actions{margin-top:10px}
+.deliver code{word-break:break-all;font-size:.85em}
+.pdf-status{font-size:.9rem;color:var(--muted);margin:8px 0 0}
+.pdf-status.ready{color:var(--good);font-weight:700}
+.pdf-status.fail{color:var(--bad)}
+.snap{position:fixed;left:-12000px;top:0;width:900px}
+
 @media print{
+  :root,:root[data-theme="dark"]{--paper:#fff;--panel:#fff;--ink:#000;--muted:#444;--line:#bbb;--glass:#2B5E88;--glass-soft:#E8EEF4;--shade:#EEF3F7;--good:#2F7D4E;--bad:#B23A3A}
   .bar,.no-print,.step:not(.final){display:none!important}
   body{background:#fff;color:#000}
+  main{padding:0}
   .step.final{border:0}
+  .report h3{break-after:avoid}
+  .report table{break-inside:avoid}
 }
 </style>
 </head>
@@ -159,6 +191,15 @@ canvas{display:block;width:100%}
   <div class="bar-in">
     <span class="bar-title">Decisiones cromatográficas con evidencia</span>
     <div class="progress" aria-live="polite"><div class="track"><span id="progFill" style="width:0"></span></div><small id="progTxt"></small></div>
+    <details class="menu" id="menu"><summary aria-label="Opciones">Opciones ▾</summary>
+      <div class="menu-pop">
+        <button type="button" data-menu="backup">Descargar respaldo del avance (.json)</button>
+        <button type="button" data-menu="restore">Cargar un respaldo…</button>
+        <button type="button" data-menu="reset" class="danger">Reiniciar la actividad en este equipo</button>
+        <small>El avance se guarda solo en este navegador. Si cambian de computadora, usen el respaldo.</small>
+      </div>
+    </details>
+    <input type="file" id="restoreFile" accept=".json,application/json" hidden>
   </div>
 </div>
 <main id="steps"></main>
@@ -244,7 +285,9 @@ const TERP_CASE=`<div class="case"><p><b>Caso.</b> Un laboratorio que certifica 
 const STEPS=[
  {id:'inicio',kind:'start',block:'Inicio',title:'Datos del equipo',
   intro:`<p>Esta actividad dura 90 minutos y avanza paso a paso. En cada bloque primero escriben su <b>predicción</b>; al enviarla queda <b>bloqueada</b> y solo entonces se abre la parte del simulador que corresponde. No podrán regresar a modificar respuestas enviadas: cada envío queda registrado con su hora.</p>
-  <p>Al terminar se genera un reporte que deben guardar como PDF y subir a Classroom.</p>`,
+  <p>Al terminar, la página genera el <b>reporte en PDF</b> del equipo para subirlo a Classroom.</p>
+  <div class="notice"><p><b>Antes de empezar.</b> Usen Chrome, Edge, Firefox o Safari. Si abrieron el enlace desde la app de Classroom o desde un chat, ábranlo primero en el navegador (menú ⋮ o compartir → <i>Abrir en el navegador</i>): el avance se guarda solo en el navegador donde trabajen.</p>
+  <p>En los números pueden usar punto o coma decimal. En el menú <b>Opciones</b> pueden descargar un respaldo del avance por si se cierra la página o cambian de computadora.</p></div>`,
   fields:[{id:'equipo',type:'line',label:'Nombre o número de equipo'},{id:'integrantes',type:'text',label:'Integrantes (nombre completo y código)',rows:3},{id:'grupo',type:'line',label:'Grupo o sección'}],
   submit:'Comenzar la actividad'},
 
@@ -400,7 +443,7 @@ function save(){try{localStorage.setItem(STORE,JSON.stringify(state));}catch(e){
 /* ================= FORMULARIOS ================= */
 function arrowSelect(name,val){return `<select data-f="${name}" aria-label="predicción">${ARWOPTS.map(([v,l])=>`<option value="${v}" ${v===val?'selected':''}>${l}</option>`).join('')}</select>`;}
 function fieldHTML(st,f,d){
-  if(f.type==='nums') return `<div class="nums">${f.items.map(it=>`<div class="field" data-req="${it.id}"><label for="f_${st.id}_${it.id}">${it.label}</label><input type="number" step="any" id="f_${st.id}_${it.id}" data-f="${it.id}" value="${esc(d[it.id]??'')}">${it.unit?`<span class="unit">${it.unit}</span>`:''}</div>`).join('')}</div>`;
+  if(f.type==='nums') return `<div class="nums">${f.items.map(it=>`<div class="field" data-req="${it.id}"><label for="f_${st.id}_${it.id}">${it.label}</label><input type="text" inputmode="decimal" autocomplete="off" class="num" id="f_${st.id}_${it.id}" data-f="${it.id}" value="${esc(d[it.id]??'')}">${it.unit?`<span class="unit">${it.unit}</span>`:''}</div>`).join('')}</div>`;
   if(f.type==='line') return `<div class="field" data-req="${f.id}"><label for="f_${st.id}_${f.id}">${f.label}</label><input type="text" id="f_${st.id}_${f.id}" data-f="${f.id}" value="${esc(d[f.id]??'')}"></div>`;
   if(f.type==='text') return `<div class="field" data-req="${f.id}"><label for="f_${st.id}_${f.id}">${f.label}</label><textarea id="f_${st.id}_${f.id}" data-f="${f.id}" rows="${f.rows||3}">${esc(d[f.id]??'')}</textarea></div>`;
   if(f.type==='select') return `<div class="field" data-req="${f.id}"><label for="f_${st.id}_${f.id}">${f.label}</label><select id="f_${st.id}_${f.id}" data-f="${f.id}"><option value="">Elige una hipótesis…</option>${f.options.map(([v,l])=>`<option value="${v}" ${d[f.id]===v?'selected':''}>${l}</option>`).join('')}</select></div>`;
@@ -415,7 +458,11 @@ function reqKeys(st){const ks=[];fieldsOf(st).forEach(f=>{
   else ks.push(f.id);});return ks;}
 
 /* vista de respuestas enviadas (también se usa en el reporte) */
-function markNum(v,act,tol){const x=parseFloat(v);if(!isFinite(x))return '';const dif=(x-act)/Math.abs(act);return {dif,ok:Math.abs(dif)<=tol};}
+function parseNum(v){let s=String(v??'').trim().replace(/[\s ]/g,'').replace(/[−–]/g,'-');
+  if(/^-?\d{1,3}(,\d{3})+$/.test(s))s=s.replace(/,/g,'');else s=s.replace(',','.');
+  return /^-?(\d+\.?\d*|\.\d+)(e-?\d+)?$/i.test(s)?parseFloat(s):NaN;}
+function numKeys(st){const ks=[];fieldsOf(st).forEach(f=>{if(f.type==='nums')f.items.forEach(it=>ks.push(it.id));});return ks;}
+function markNum(v,act,tol){const x=parseNum(v);if(!isFinite(x))return '';const dif=(x-act)/Math.abs(act);return {dif,ok:Math.abs(dif)<=tol};}
 function doneHTML(st){
   const a=state.ans[st.id]||{};let h='';
   if(st.kind==='diag'){
@@ -469,7 +516,8 @@ function render(){
       <div class="actions"><button class="btn primary" id="submitBtn">${st.submit||'Enviar diagnóstico'}</button><span class="err" id="errMsg" role="alert"></span></div>
       <p class="lock-note">Al enviar, estas respuestas quedan bloqueadas.</p></div>`;
     main.appendChild(sec);
-    sec.querySelectorAll('[data-f]').forEach(el=>el.addEventListener('input',()=>{(state.draft[st.id]=state.draft[st.id]||{})[el.dataset.f]=el.value;save();}));
+    sec.querySelectorAll('[data-f]').forEach(el=>el.addEventListener('input',()=>{(state.draft[st.id]=state.draft[st.id]||{})[el.dataset.f]=el.value;save();
+      const w=el.closest('.missing');if(w)w.classList.remove('missing');resetConfirm($('submitBtn'),st);}));
     $('submitBtn').addEventListener('click',()=>submit(st,sec));
     if(st.kind==='diag'){
       if(!state.myst[st.id]){const base=PRESETS[st.base].s;const opts=MYST.filter(m=>!(m.packedOnly&&base.type!=='packed'));
@@ -483,11 +531,18 @@ function render(){
 function submit(st,sec){
   const d=state.draft[st.id]||{};const miss=reqKeys(st).filter(k=>!(d[k]!==undefined&&String(d[k]).trim()!==''));
   sec.querySelectorAll('.missing').forEach(e=>e.classList.remove('missing'));
-  if(miss.length){miss.forEach(k=>{const el=sec.querySelector(`[data-req="${CSS.escape(k)}"]`);if(el)el.classList.add('missing');});
-    $('errMsg').textContent=`Faltan ${miss.length} respuesta(s) marcadas en rojo.`;return;}
+  const bad=numKeys(st).filter(k=>!miss.includes(k)&&!isFinite(parseNum(d[k])));
+  const btn=$('submitBtn');
+  if(miss.length||bad.length){[...miss,...bad].forEach(k=>{const el=sec.querySelector(`[data-req="${CSS.escape(k)}"]`);if(el)el.classList.add('missing');});
+    $('errMsg').textContent=[miss.length?`Faltan ${miss.length} respuesta(s)`:'',bad.length?`${bad.length} valor(es) no son un número válido`:''].filter(Boolean).join(' y ')+' (marcados en rojo).';
+    resetConfirm(btn,st);const first=sec.querySelector('.missing input,.missing textarea,.missing select,.missing');if(first&&first.focus)first.focus();return;}
+  if(!btn.dataset.armed){btn.dataset.armed='1';btn.classList.add('confirm');btn.textContent='Confirmar envío (ya no podrán modificarlo)';$('errMsg').textContent='';
+    clearTimeout(btn._t);btn._t=setTimeout(()=>resetConfirm(btn,st),6000);return;}
+  clearTimeout(btn._t);
   state.ans[st.id]=clone(d);state.time[st.id]=Date.now();if(st.id==='inicio')state.start=state.time[st.id];
   state.cur++;save();stopPlay();render();
 }
+function resetConfirm(btn,st){if(!btn)return;clearTimeout(btn._t);delete btn.dataset.armed;btn.classList.remove('confirm');btn.textContent=st.submit||'Enviar diagnóstico';}
 
 /* ================= SIMULADOR (una instancia a la vez) ================= */
 let SIM=null;
@@ -691,45 +746,221 @@ function reportBody(){
   <b>Fecha:</b> ${new Date(state.start||Date.now()).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'})} &nbsp; <b>Inicio:</b> ${state.start?hhmm(state.start):'—'} &nbsp; <b>Fin:</b> ${hhmm(end)} &nbsp; <b>Duración:</b> ${state.start?Math.round((end-state.start)/60000):'—'} min</p>
   <div class="summary-grid"><div><b>${sc.aOk}/${sc.aTot}</b>predicciones de tendencia correctas</div><div><b>${sc.nOk}/${sc.nTot}</b>cálculos dentro de tolerancia</div><div><b>${sc.mOk}/49</b>celdas de la matriz</div><div><b>${sc.dOk}/3</b>diagnósticos correctos</div></div>
   <p style="font-size:.85rem">Las comparaciones usan el modelo del simulador. Tolerancias: 2 % a 20 % según el dato (las lecturas en pantalla admiten más error).</p>`;
+  const lg=logLines();if(lg.length)h+=`<p class="flag bad">${lg.map(esc).join(' ')}</p>`;
   let lastBlock='';
   STEPS.forEach(st=>{if(st.id==='inicio'||st.kind==='final'||!state.time[st.id])return;
     if(st.block!==lastBlock){h+=`<h2 style="margin-top:22px">${st.block}</h2>`;lastBlock=st.block;}
     h+=`<h3>${st.title} <small style="font-weight:400">(enviado ${hhmm(state.time[st.id])}, minuto ${Math.round((state.time[st.id]-state.start)/60000)})</small></h3>${doneHTML(st)}`;});
   return h;
 }
-function reportDoc(){
-  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Reporte ${esc((state.ans.inicio||{}).equipo)}</title>
-<style>body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;max-width:820px;margin:24px auto;padding:0 18px;color:#16232A;line-height:1.5;font-size:14px}
-h1{font-family:Georgia,serif;font-size:22px}h2{font-family:Georgia,serif;font-size:18px;border-bottom:2px solid #2B5E88;padding-bottom:3px}h3{font-size:15px;margin:14px 0 6px}
-table{border-collapse:collapse;width:100%;margin:6px 0 10px;font-size:13px}th,td{border:1px solid #CAD4D0;padding:4px 6px;text-align:center}th:first-child,td:first-child{text-align:left}
-.ok{color:#2F7D4E;font-weight:700}.no{color:#B23A3A;font-weight:700}.qa{margin:0 0 10px}.qa b{display:block}.ans{white-space:pre-wrap}
-.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.summary-grid div{background:#EEF3F7;padding:8px;border-radius:6px;font-size:12px}.summary-grid b{display:block;font-size:18px}
-.printbtn{position:fixed;right:16px;top:16px;padding:10px 16px;background:#2B5E88;color:#fff;border:0;border-radius:8px;font-size:14px;cursor:pointer}
-@media print{.printbtn{display:none}h3{break-after:avoid}table{break-inside:avoid}}</style></head>
-<body><button class="printbtn" onclick="window.print()">Imprimir o guardar como PDF</button>${reportBody()}</body></html>`;
-}
 function reportText(){const tmp=document.createElement('div');tmp.innerHTML=reportBody();tmp.querySelectorAll('tr').forEach(tr=>{tr.append(' ');});return tmp.innerText;}
+
+/* ================= ARCHIVOS: nombre, descarga, respaldo ================= */
+function slug(s){return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,40);}
+function fileBase(){const i=state.ans.inicio||state.draft.inicio||{};return ['Reporte_cromatografia',slug(i.equipo)||'equipo',slug(i.grupo)].filter(Boolean).join('_');}
+function saveBlob(blob,name){const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.rel='noopener';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}
+function downloadBackup(){
+  const data=JSON.stringify({app:STORE,saved:Date.now(),state},null,1);
+  saveBlob(new Blob([data],{type:'application/json'}),fileBase().replace('Reporte_','Respaldo_')+'_'+new Date().toTimeString().slice(0,5).replace(':','h')+'.json');
+}
+function restoreFrom(file){
+  const rd=new FileReader();
+  rd.onload=()=>{let s;try{const o=JSON.parse(rd.result);s=o&&o.state?o.state:o;if(!s||typeof s.cur!=='number'||typeof s.ans!=='object')throw 0;}
+    catch(e){alert('El archivo no es un respaldo válido de esta actividad.');return;}
+    const started=Object.keys(state.time).length>0;
+    if(!confirm((started?'Esto reemplazará el avance actual de este navegador por el del respaldo. ':'')+'La carga del respaldo quedará registrada en el reporte. ¿Continuar?'))return;
+    const log=(Array.isArray(s.log)?s.log:[]).concat([{ev:'restore',t:Date.now(),saved:(JSON.parse(rd.result).saved)||null}]);
+    state=Object.assign({cur:0,ans:{},draft:{},time:{},myst:{},start:null},s,{log});
+    state.cur=Math.min(Math.max(0,state.cur|0),STEPS.length-1);save();pdfCache=null;render();window.scrollTo(0,0);};
+  rd.readAsText(file);
+}
+function resetAll(){
+  const done=state.cur>=STEPS.length-1;
+  if(!confirm(done?'Se borrará el trabajo de este equipo en este navegador para que otro equipo pueda empezar. ¿Ya descargaron y subieron su PDF?':'Se borrará todo el avance de este equipo en este navegador y empezarán desde cero. ¿Reiniciar?'))return;
+  try{localStorage.removeItem(STORE);}catch(e){}
+  state={cur:0,ans:{},draft:{},time:{},myst:{},start:null};pdfCache=null;render();window.scrollTo(0,0);
+}
+function logLines(){return (state.log||[]).filter(e=>e.ev==='restore').map(e=>`Se cargó un respaldo a las ${hhmm(e.t)}${e.saved?` (respaldo guardado a las ${hhmm(e.saved)})`:''}.`);}
+
+/* ================= PDF (pdfmake, cargado bajo demanda desde /vendor) ================= */
+const PDF_LIBS=['vendor/pdfmake-0.2.20.min.js','vendor/report-fonts.js'];
+let pdfLibP=null,pdfCache=null;
+function loadScript(src){return new Promise((ok,ko)=>{const s=document.createElement('script');s.src=src;s.async=true;s.onload=ok;s.onerror=()=>ko(new Error('No se pudo cargar '+src));document.head.appendChild(s);});}
+function loadPdfLib(){
+  if(!pdfLibP)pdfLibP=PDF_LIBS.reduce((p,src)=>p.then(()=>loadScript(src)),Promise.resolve()).then(()=>{
+    const pm=window.pdfMake;if(!pm||!window.REPORT_FONT_VFS)throw new Error('Biblioteca PDF incompleta');
+    pm.vfs=Object.assign({},pm.vfs||{},window.REPORT_FONT_VFS);
+    pm.fonts={DejaVu:{normal:'DejaVuSans.ttf',bold:'DejaVuSans-Bold.ttf',italics:'DejaVuSans.ttf',bolditalics:'DejaVuSans-Bold.ttf'},
+              Serif:{normal:'DejaVuSerif-Bold.ttf',bold:'DejaVuSerif-Bold.ttf',italics:'DejaVuSerif-Bold.ttf',bolditalics:'DejaVuSerif-Bold.ttf'}};
+    return pm;}).catch(e=>{pdfLibP=null;throw e;});
+  return pdfLibP;
+}
+const PC={ink:'#16232A',muted:'#56666E',line:'#CAD4D0',glass:'#2B5E88',soft:'#EEF3F7',good:'#2F7D4E',bad:'#B23A3A',ans:'#F5F7F6',okBg:'#EAF4EE',noBg:'#F9ECEC'};
+const TL={hLineWidth:()=>.5,vLineWidth:()=>.5,hLineColor:()=>PC.line,vLineColor:()=>PC.line,paddingLeft:()=>5,paddingRight:()=>5,paddingTop:()=>3,paddingBottom:()=>3};
+/* HTML sencillo (sub, sup, b, i, br) a texto enriquecido de pdfmake */
+function rich(html,base){
+  const t=document.createElement('template');t.innerHTML=String(html??'');const out=[];
+  const walk=(n,sty)=>n.childNodes.forEach(c=>{
+    if(c.nodeType===3){const x=c.nodeValue.replace(/\s+/g,' ');if(x)out.push(Object.assign({text:x},sty));}
+    else if(c.nodeType===1){const g=c.tagName,s=Object.assign({},sty);
+      if(g==='BR'){out.push({text:'\n'});return;}
+      if(g==='SUB')s.sub=true;if(g==='SUP')s.sup=true;if(g==='B'||g==='STRONG')s.bold=true;if(g==='I'||g==='EM')s.italics=true;walk(c,s);}});
+  walk(t.content,base||{});return out.length?out:[{text:''}];
+}
+const pth=t=>({text:rich(t),bold:true,color:PC.muted,fillColor:PC.soft,fontSize:8.5});
+const pmark=ok=>({text:ok?'✓':'✗',color:ok?PC.good:PC.bad,bold:true});
+function pqa(label,ans){const v=String(ans??'').trim()||'—';
+  return {stack:[{text:rich(label),bold:true,margin:[0,0,0,3]},
+    {table:{widths:['*'],body:[[{text:v,fillColor:PC.ans}]]},layout:Object.assign({},TL,{hLineColor:()=>'#DCE3E0',vLineColor:()=>'#DCE3E0',paddingTop:()=>5,paddingBottom:()=>5,paddingLeft:()=>7,paddingRight:()=>7})}],
+    margin:[0,2,0,9],unbreakable:v.length<900};}
+/* imagen del cromatograma de diagnóstico, dibujada fuera de pantalla con colores claros */
+function snapChrom(preset,mystery){
+  const host=document.createElement('div');host.className='snap';host.setAttribute('aria-hidden','true');document.body.appendChild(host);
+  const html=document.documentElement,prevTheme=html.getAttribute('data-theme'),prevSim=SIM;let url=null;
+  html.setAttribute('data-theme','light');
+  try{mountSim(host,{preset,ref:{preset},refLabel:'cromatograma original',mystery,panels:['chrom']});url=host.querySelector('.cv-chrom').toDataURL('image/png');}catch(e){url=null;}
+  finally{SIM=prevSim;host.remove();if(prevTheme===null)html.removeAttribute('data-theme');else html.setAttribute('data-theme',prevTheme);}
+  return url&&url.length>200?url:null;
+}
+function pdfStep(st){
+  const a=state.ans[st.id]||{};const out=[];
+  if(st.kind==='diag'){
+    const real=mystById(state.myst[st.id]);const ok=a.hyp===state.myst[st.id];
+    out.push(pqa('Evidencia observada',a.evid));
+    out.push({text:[{text:'Hipótesis: ',bold:true},(mystById(a.hyp)?.label||'—')+'   ',{text:ok?'✓ correcta':'✗ incorrecta',bold:true,color:ok?PC.good:PC.bad}],margin:[0,0,0,2]});
+    out.push({text:[{text:'Cambio real: ',bold:true},real?.label||'—'],margin:[0,0,0,6]});
+    const img=snapChrom(st.base,real);
+    if(img)out.push({stack:[{image:img,width:470,alignment:'center'},{text:'Línea punteada: cromatograma original. Línea continua: cromatograma con el cambio oculto.',style:'note',alignment:'center',margin:[0,3,0,0]}],unbreakable:true,margin:[0,0,0,8]});
+    return out;}
+  fieldsOf(st).forEach(f=>{
+    if(f.type==='nums'){
+      const hasAct=f.items.some(it=>it.actual);
+      const body=[[pth('Dato'),pth('Su valor'),...(hasAct?[pth('Simulador'),pth('Diferencia')]:[])]];
+      f.items.forEach(it=>{const v=a[it.id];
+        const row=[{text:[...rich(it.label),...(it.unit?[{text:' ('+it.unit+')',color:PC.muted}]:[])]},{text:isFinite(parseNum(v))?fmt(parseNum(v),4):String(v??''),alignment:'right'}];
+        if(it.actual){const act=it.actual();const m=markNum(v,act,it.tol);
+          row.push({text:fmt(act,4),alignment:'right'},m?{text:[(m.dif>=0?'+':'')+fmt(m.dif*100,2)+' %  ',pmark(m.ok)],alignment:'right',color:m.ok?PC.good:PC.bad}:{text:'—',alignment:'right'});}
+        body.push(row);});
+      out.push({table:{headerRows:1,dontBreakRows:true,widths:hasAct?['*',72,72,88]:['*',90],body},layout:TL,fontSize:9,margin:[0,2,0,9]});
+    } else if(f.type==='arrows'){
+      const act=f.actual();
+      const body=[[pth('Parámetro'),pth('Predicción'),pth('Simulador'),pth('')]];
+      f.params.forEach(([k,l])=>{const p=a[f.id+'.'+k];const ok=p===act[k];
+        body.push([{text:rich(l)},{text:ARW[p]||'—',alignment:'center'},{text:ARW[act[k]],alignment:'center'},Object.assign(pmark(ok),{alignment:'center'})]);});
+      out.push({stack:[{text:rich(f.label),bold:true,margin:[0,0,0,3]},{table:{headerRows:1,widths:['*',80,80,30],body},layout:TL,fontSize:9}],unbreakable:true,margin:[0,2,0,9]});
+    } else if(f.type==='matrix'){
+      let okc=0;const body=[[pth('Si aumenta…'),...MATRIX_COLS.map(c=>Object.assign(pth(c[1]),{alignment:'center'}))]];
+      MATRIX_ROWS.forEach(([r,rl])=>body.push([{text:rich(rl)},...MATRIX_COLS.map(([c],j)=>{const p=a['mat.'+r+'.'+c];const k=MATRIX_KEY[r][j];const ok=p===k;if(ok)okc++;
+        return {text:ok?ARW[p]:[ARW[p]||'—',{text:'  ('+ARW[k]+')',fontSize:7.5,color:PC.muted,bold:false}],alignment:'center',bold:true,color:ok?PC.good:PC.bad,fillColor:ok?PC.okBg:PC.noBg};})]));
+      out.push({text:['Coincidencias con el modelo: ',{text:okc+' de 49',bold:true},'. En las celdas incorrectas, entre paréntesis, la respuesta del modelo.'],margin:[0,0,0,4]});
+      out.push({table:{headerRows:1,dontBreakRows:true,widths:[92,...Array(MATRIX_COLS.length).fill('*')],body},layout:TL,fontSize:9,margin:[0,0,0,9]});
+    } else {
+      const v=f.type==='select'?(f.options.find(o=>o[0]===a[f.id])||[,''])[1]:a[f.id];
+      out.push(pqa(f.label,v));
+    }
+  });
+  return out;
+}
+function pdfDoc(){
+  const i=state.ans.inicio||{};const sc=scores();const end=state.time.cierre||Date.now();const gen=new Date();
+  const eq=String(i.equipo||'').trim()||'—',grp=String(i.grupo||'').trim()||'—';
+  const dfmt=t=>new Date(t).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'});
+  const key=t=>({text:t,bold:true,color:PC.muted});
+  const cut=t=>t.replace(/\s+/g,' ').length>40?t.replace(/\s+/g,' ').slice(0,39)+'…':t.replace(/\s+/g,' ');
+  const box=(x,y,l)=>({stack:[{text:`${x}/${y}`,font:'Serif',fontSize:17,color:PC.glass},{text:l,fontSize:8,color:PC.muted}],fillColor:PC.soft,margin:[2,4,2,4]});
+  const content=[
+    {text:'Reporte de la actividad guiada',style:'title'},
+    {text:'Decisiones cromatográficas con evidencia',style:'subtitle',margin:[0,0,0,12]},
+    {table:{widths:[78,'*'],body:[
+      [key('Equipo'),{text:eq,bold:true}],[key('Grupo'),grp],[key('Integrantes'),String(i.integrantes||'').trim()||'—'],
+      [key('Fecha'),dfmt(state.start||end)],
+      [key('Horario'),`Inicio ${state.start?hhmm(state.start):'—'}  ·  Fin ${hhmm(end)}  ·  Duración ${state.start?Math.round((end-state.start)/60000):'—'} min`]]},
+     layout:TL,margin:[0,0,0,12]},
+    {table:{widths:['*','*','*','*'],body:[[box(sc.aOk,sc.aTot,'predicciones de tendencia correctas'),box(sc.nOk,sc.nTot,'cálculos dentro de tolerancia'),box(sc.mOk,49,'celdas de la matriz'),box(sc.dOk,3,'diagnósticos correctos')]]},
+     layout:{hLineWidth:()=>0,vLineWidth:(k,node)=>(k===0||k===node.table.widths.length)?0:6,vLineColor:()=>'#FFFFFF',paddingLeft:()=>8,paddingRight:()=>8,paddingTop:()=>2,paddingBottom:()=>2},margin:[0,0,0,6]},
+    {text:'Las comparaciones usan el modelo del simulador. Tolerancias: 2 % a 20 % según el dato (las lecturas en pantalla admiten más error). Cada paso indica la hora y el minuto de la actividad en que se envió; las respuestas enviadas no se pueden modificar.',style:'note',margin:[0,0,0,4]}
+  ];
+  const lg=logLines();if(lg.length)content.push({text:[{text:'Registro: ',bold:true},lg.join(' ')],style:'note',color:PC.bad,margin:[0,0,0,4]});
+  let lastBlock='';
+  STEPS.forEach(st=>{if(st.id==='inicio'||st.kind==='final'||!state.time[st.id])return;
+    const head=[];
+    if(st.block!==lastBlock){head.push({text:st.block,style:'h2'},{canvas:[{type:'line',x1:0,y1:0,x2:516,y2:0,lineWidth:1.2,lineColor:PC.glass}],margin:[0,0,0,4]});lastBlock=st.block;}
+    head.push({text:[st.title,{text:`   enviado ${hhmm(state.time[st.id])} · minuto ${Math.round((state.time[st.id]-state.start)/60000)}`,fontSize:8.5,color:PC.muted,bold:false}],style:'h3'});
+    const body=pdfStep(st);
+    content.push({stack:head.concat(body.slice(0,1)),unbreakable:true});
+    content.push(...body.slice(1));
+  });
+  return {
+    pageSize:'LETTER',pageMargins:[48,52,48,48],
+    info:{title:`Reporte - ${eq} - Decisiones cromatográficas con evidencia`,author:eq,subject:'Decisiones cromatográficas con evidencia',creator:'Actividad guiada de cromatografía'},
+    defaultStyle:{font:'DejaVu',fontSize:9.5,lineHeight:1.2,color:PC.ink},
+    styles:{title:{font:'Serif',fontSize:19,color:PC.glass},subtitle:{fontSize:11,color:PC.muted},
+      h2:{font:'Serif',fontSize:13.5,color:PC.glass,margin:[0,14,0,3]},h3:{bold:true,fontSize:10.5,margin:[0,8,0,5]},note:{fontSize:8,color:PC.muted}},
+    header:p=>p===1?null:{text:`Decisiones cromatográficas con evidencia · Equipo ${cut(eq)} · Grupo ${cut(grp)}`,alignment:'right',fontSize:7.5,color:PC.muted,margin:[48,24,48,0]},
+    footer:(p,n)=>({columns:[{text:`Generado el ${dfmt(gen)}, ${hhmm(gen)}`,fontSize:7.5,color:PC.muted},{text:`Página ${p} de ${n}`,alignment:'right',fontSize:7.5,color:PC.muted}],margin:[48,16,48,0]}),
+    content
+  };
+}
+async function buildPdf(){
+  const pm=await loadPdfLib();const dd=pdfDoc();
+  const blob=await new Promise((ok,ko)=>{try{pm.createPdf(dd).getBlob(b=>ok(b));}catch(e){ko(e);}});
+  const name=fileBase()+'.pdf';
+  return {blob,name,url:URL.createObjectURL(blob),file:(typeof File==='function')?new File([blob],name,{type:'application/pdf'}):null};
+}
+
+/* ================= PASO FINAL ================= */
 function finalHTML(){
   return `<div class="step-body"><div class="kicker"><span>Reporte</span></div><h2>Actividad terminada</h2>
-  <p>Para entregar en Classroom:</p>
-  <ol class="howto no-print"><li>Pulsen <b>Descargar reporte</b> y acepten la descarga.</li><li>Abran el archivo descargado y pulsen <b>Imprimir o guardar como PDF</b>; elijan "Guardar como PDF".</li><li>Suban el PDF a la tarea de Classroom (una entrega por equipo, con los nombres de todos).</li></ol>
-  <div class="actions no-print"><button class="btn primary" id="dlBtn" hidden>Descargar reporte</button><button class="btn" id="prBtn">Imprimir esta página</button><button class="btn" id="cpBtn">Copiar reporte como texto</button><span class="err" id="dlMsg" role="status"></span></div>
-  <hr style="margin:20px 0;border:0;border-top:1px solid var(--line)"><div class="report">${reportBody()}</div></div>`;
+  <div class="deliver no-print"><h3>Entregar en Classroom</h3>
+   <ol class="howto"><li>Pulsen <b>Descargar PDF</b>. El archivo se llama <code id="pdfName">${esc(fileBase())}.pdf</code>.</li>
+    <li>Ábranlo y revisen que aparezcan los nombres y códigos de todos los integrantes.</li>
+    <li>En la tarea de Classroom: <i>Agregar o crear → Archivo</i>, suban el PDF y pulsen <i>Entregar</i> (una entrega por equipo).</li></ol>
+   <div class="actions"><button class="btn primary" id="pdfBtn" disabled>Descargar PDF</button><button class="btn" id="shareBtn" hidden>Compartir PDF…</button><button class="btn" id="openBtn" disabled>Abrir PDF en otra pestaña</button></div>
+   <p class="pdf-status" id="pdfStatus" role="status">Preparando el PDF…</p>
+   <details style="margin-top:10px"><summary>¿No se descarga el PDF? Otras opciones</summary>
+    <ul class="howto"><li>En celular, pulsen <b>Compartir PDF</b> y elijan Classroom o Drive.</li>
+     <li>Si están dentro de la app de Classroom o de un chat, abran esta página en Chrome o Safari: su avance no se pierde si es el mismo navegador.</li>
+     <li><b>Imprimir esta página</b> y elegir <i>Guardar como PDF</i> como impresora.</li>
+     <li><b>Descargar respaldo</b> y entregar el archivo .json al profesor, que puede regenerar el reporte.</li></ul>
+    <div class="actions"><button class="btn" id="prBtn">Imprimir esta página</button><button class="btn" id="cpBtn">Copiar reporte como texto</button><button class="btn" id="bkBtn">Descargar respaldo (.json)</button></div>
+   </details>
+   <span class="err" id="dlMsg" role="status"></span>
+  </div>
+  <div class="deliver no-print"><h3>¿Otro equipo usará esta computadora?</h3><p style="margin:0">Cuando ya hayan subido su PDF, reinicien la actividad para que el siguiente equipo empiece desde cero.</p>
+   <div class="actions"><button class="btn" id="newBtn">Reiniciar para otro equipo</button></div></div>
+  <hr class="no-print" style="margin:20px 0;border:0;border-top:1px solid var(--line)"><div class="report">${reportBody()}</div></div>`;
 }
 function wireFinal(){
-  const msg=$('dlMsg');
-  $('prBtn').addEventListener('click',()=>{try{window.print();}catch(e){msg.textContent='La impresión directa no está disponible aquí; usen Descargar reporte.';}});
+  const msg=$('dlMsg'),stat=$('pdfStatus'),pdfBtn=$('pdfBtn'),openBtn=$('openBtn'),shareBtn=$('shareBtn');
+  const setStat=(t,c)=>{stat.textContent=t;stat.className='pdf-status'+(c?' '+c:'');};
+  const ready=c=>{pdfBtn.disabled=false;pdfBtn.textContent='Descargar PDF';openBtn.disabled=false;
+    setStat(`PDF listo (${Math.max(1,Math.round(c.blob.size/1024))} KB).`,'ready');
+    try{if(c.file&&navigator.canShare&&navigator.canShare({files:[c.file]}))shareBtn.hidden=false;}catch(e){}};
+  const prepare=()=>{pdfBtn.disabled=true;openBtn.disabled=true;setStat('Preparando el PDF…');
+    buildPdf().then(c=>{pdfCache=c;if($('pdfBtn')===pdfBtn)ready(c);}).catch(e=>{console.error(e);if($('pdfBtn')!==pdfBtn)return;
+      pdfBtn.disabled=false;pdfBtn.textContent='Reintentar el PDF';
+      setStat('No se pudo generar el PDF'+(navigator.onLine===false?' (sin conexión a internet)':'')+'. Pulsen Reintentar o usen las otras opciones.','fail');});};
+  pdfBtn.addEventListener('click',()=>{if(!pdfCache){prepare();return;}
+    saveBlob(pdfCache.blob,pdfCache.name);msg.textContent='Descarga iniciada. Si no aparece, usen Abrir PDF en otra pestaña o Compartir.';});
+  openBtn.addEventListener('click',()=>{if(!pdfCache)return;const w=window.open(pdfCache.url,'_blank');
+    if(!w)msg.textContent='El navegador bloqueó la pestaña nueva. Permitan las ventanas emergentes o usen Descargar PDF.';});
+  shareBtn.addEventListener('click',async()=>{if(!pdfCache||!pdfCache.file)return;
+    try{await navigator.share({files:[pdfCache.file],title:pdfCache.name});msg.textContent='';}
+    catch(e){if(e&&e.name!=='AbortError')msg.textContent='No se pudo compartir; usen Descargar PDF.';}});
+  $('prBtn').addEventListener('click',()=>{try{window.print();}catch(e){msg.textContent='La impresión no está disponible en este navegador.';}});
   $('cpBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(reportText());msg.textContent='Reporte copiado. Péguenlo en un documento y guárdenlo como PDF.';}catch(e){msg.textContent='No se pudo copiar automáticamente; seleccionen el texto del reporte y cópienlo.';}});
-  if(window.claude&&typeof window.claude.use==='function'){
-    window.claude.use('downloads').then(dl=>{if(!dl)return;const b=$('dlBtn');if(!b)return;b.hidden=false;
-      b.addEventListener('click',async()=>{const eq=((state.ans.inicio||{}).equipo||'equipo').replace(/[^\p{L}\p{N} _-]/gu,'').trim()||'equipo';
-        try{await dl.save({filename:`Reporte cromatografia - ${eq}.html`,data:reportDoc()});msg.textContent='Reporte descargado. Ábranlo y guárdenlo como PDF.';}
-        catch(e){const c=e&&e.code;msg.textContent=c==='declined'?'Descarga cancelada. Pueden intentarlo de nuevo.':c==='rate_limited'?'Esperen un momento y vuelvan a intentarlo.':'La descarga no está disponible aquí; usen Imprimir o Copiar.';}});});
-  }
+  $('bkBtn').addEventListener('click',downloadBackup);
+  $('newBtn').addEventListener('click',resetAll);
+  if(pdfCache)ready(pdfCache);else prepare();
 }
 
 let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>simUpdate(),120);});
 if(window.matchMedia)window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>simUpdate());
+const menu=$('menu');
+menu.addEventListener('click',e=>{const b=e.target.closest('[data-menu]');if(!b)return;menu.open=false;
+  if(b.dataset.menu==='backup')downloadBackup();else if(b.dataset.menu==='restore')$('restoreFile').click();else if(b.dataset.menu==='reset')resetAll();});
+document.addEventListener('click',e=>{if(menu.open&&!menu.contains(e.target))menu.open=false;});
+$('restoreFile').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(f)restoreFrom(f);e.target.value='';});
 render();
 })();
 </script>
