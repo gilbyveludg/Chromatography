@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Actividad guiada: decisiones cromatográficas con evidencia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Newsreader:opsz,wght@6..72,500;6..72,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F2F5F3; --panel:#FFFFFF; --ink:#16232A; --muted:#56666E; --line:#CAD4D0;
+  --glass:#2B5E88; --glass-soft:#DDE8F1; --a:#2F7D4E; --b:#D2701A; --ghost:#8A969C;
+  --good:#2F7D4E; --bad:#B23A3A; --shade:rgba(43,94,136,.08);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F171B; --panel:#162127; --ink:#E3ECE8; --muted:#9AABB2; --line:#2B3A41;
+    --glass:#7FB0DA; --glass-soft:#1C3143; --a:#62C08A; --b:#F0A04B; --ghost:#6F7D84;
+    --good:#62C08A; --bad:#E77676; --shade:rgba(127,176,218,.10);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F171B; --panel:#162127; --ink:#E3ECE8; --muted:#9AABB2; --line:#2B3A41;
+  --glass:#7FB0DA; --glass-soft:#1C3143; --a:#62C08A; --b:#F0A04B; --ghost:#6F7D84;
+  --good:#62C08A; --bad:#E77676; --shade:rgba(127,176,218,.10);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15.5px;line-height:1.55;font-variant-numeric:tabular-nums}
+h1,h2,h3,h4{font-family:"Newsreader",Georgia,"Times New Roman",serif;font-weight:600;line-height:1.2;margin:0}
+h1{font-size:1.8rem} h2{font-size:1.35rem} h3{font-size:1.1rem} h4{font-size:1rem}
+sub,sup{font-size:.72em}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--glass);outline-offset:2px}
+
+.bar{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1px solid var(--line);padding:calc(env(safe-area-inset-top,0px) + 10px) 20px 10px;margin-top:calc(-1 * env(safe-area-inset-top,0px))}
+.bar-in{max-width:980px;margin:0 auto;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.bar-title{font-family:"Newsreader",Georgia,serif;font-weight:600;font-size:1.05rem}
+.progress{flex:1;min-width:180px;max-width:420px}
+.progress .track{height:8px;border-radius:4px;background:var(--glass-soft);overflow:hidden}
+.progress .track span{display:block;height:100%;background:var(--glass);transition:width .3s}
+.progress small{color:var(--muted);font-size:.8rem}
+main{max-width:980px;margin:0 auto;padding:20px 20px 60px}
+
+.step{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin:0 0 16px}
+.step.current{border:2px solid var(--glass)}
+.step-body{padding:18px 20px}
+.kicker{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px;color:var(--muted);font-size:.88rem}
+.tag{display:inline-block;padding:1px 9px;border-radius:999px;font-size:.8rem;font-weight:700}
+.tag.pred{background:var(--glass-soft);color:var(--glass)}
+.tag.sim{background:var(--glass);color:var(--panel)}
+.tag.diag{border:1.5px dashed var(--glass);color:var(--glass)}
+.case{background:var(--shade);border-left:4px solid var(--glass);padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+.case p{margin:0 0 6px} .case p:last-child{margin:0}
+.lock-note{font-size:.88rem;color:var(--muted);margin:10px 0 0}
+details.step > summary{list-style:none;cursor:pointer;padding:12px 20px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+details.step > summary::-webkit-details-marker{display:none}
+details.step > summary .when{color:var(--muted);font-size:.85rem;white-space:nowrap}
+details.step[open] > summary{border-bottom:1px solid var(--line)}
+.done-body{padding:12px 20px 16px;font-size:.93rem}
+.qa{margin:0 0 10px}
+.qa b{display:block;font-weight:700}
+.ans{white-space:pre-wrap}
+
+.field{margin:16px 0}
+.field > label, .field > .lbl{display:block;font-weight:700;margin-bottom:6px}
+.field textarea{width:100%;min-height:84px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);resize:vertical}
+.field input[type=text], .field input[type=number]{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper)}
+.field input[type=text]{width:100%}
+.field input[type=number]{width:150px;text-align:right}
+.field .unit{margin-left:8px;color:var(--muted)}
+.field select{padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:var(--paper);max-width:100%}
+.field.missing textarea,.field.missing input,.field.missing select{border-color:var(--bad);border-width:2px}
+.nums{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px 18px}
+.nums .field{margin:0}
+.nums label{font-weight:400!important}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{padding:6px 7px;border-bottom:1px solid var(--line);text-align:center;vertical-align:middle}
+th:first-child,td:first-child{text-align:left}
+thead th{color:var(--muted);font-size:.84rem;font-weight:700}
+.tbl-scroll{overflow-x:auto}
+.ok{color:var(--good);font-weight:700}
+.no{color:var(--bad);font-weight:700}
+.btn{border:1px solid var(--line);background:var(--panel);padding:8px 14px;border-radius:8px}
+.btn.primary{background:var(--glass);border-color:var(--glass);color:var(--panel);font-weight:700}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:18px}
+.err{color:var(--bad);font-size:.9rem}
+.formula{font-family:"Newsreader",Georgia,serif;font-size:1.05rem;background:var(--shade);padding:8px 12px;border-radius:8px;overflow-x:auto;white-space:nowrap;margin:10px 0}
+
+/* simulador */
+.simwrap{margin:16px 0}
+.sim{display:grid;grid-template-columns:1fr;gap:16px}
+.sim.with-ctl{grid-template-columns:250px minmax(0,1fr)}
+.sim-ctl{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px;align-self:start}
+.sim-ctl h4{color:var(--glass);margin-bottom:6px}
+.ctl{margin:8px 0 12px}
+.ctl label{display:block;font-size:.88rem;margin-bottom:2px}
+.ctl-row{display:flex;gap:6px;align-items:center}
+.ctl-row input[type=range]{flex:1;min-width:0;accent-color:var(--glass)}
+.ctl-row input[type=number]{width:70px;padding:3px 5px;border:1px solid var(--line);border-radius:6px;background:var(--panel);text-align:right}
+.ctl .u{font-size:.8rem;color:var(--muted);min-width:38px}
+.sim-main{min-width:0}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.toolbar .btn{padding:6px 11px;font-size:.9rem}
+figure{margin:0 0 12px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:8px 10px;position:relative}
+figcaption{font-size:.84rem;color:var(--muted);margin-bottom:4px}
+canvas{display:block;width:100%}
+.cv-col{height:104px}
+.cv-chrom{height:290px;cursor:crosshair}
+.cv-std{height:250px}
+.timebar{display:flex;gap:10px;align-items:center;margin-top:6px}
+.timebar input{flex:1;accent-color:var(--glass)}
+.timebar output{min-width:90px;text-align:right;font-size:.85rem;color:var(--muted)}
+.readout{position:absolute;right:14px;top:8px;font-size:.85rem;color:var(--ink);font-weight:700}
+.results,.two{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px}
+.results .panel,.two .panel{margin-bottom:0}
+.panel h4{margin-bottom:4px}
+.panel td,.panel th{text-align:right}
+.panel td:first-child,.panel th:first-child{text-align:left}
+.delta{display:block;font-size:.74rem;color:var(--muted)}
+.delta.up{color:var(--glass)} .delta.down{color:var(--b)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+.flag{margin:6px 0 0;padding:6px 9px;border-radius:8px;font-size:.86rem;background:var(--shade)}
+.flag.bad{color:var(--bad)} .flag.good{color:var(--good)}
+.meter{margin:6px 0}
+.meter .lr{display:flex;justify-content:space-between;font-size:.86rem}
+.meter .mb{height:9px;background:var(--glass-soft);border-radius:5px;overflow:hidden}
+.meter .mb span{display:block;height:100%;background:var(--glass)}
+.legend{font-size:.88rem;color:var(--muted);margin:0 0 8px}
+
+.report{font-size:.93rem}
+.report h3{margin:18px 0 6px}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:12px 0}
+.summary-grid div{background:var(--shade);border-radius:8px;padding:8px 12px}
+.summary-grid b{display:block;font-family:"Newsreader",Georgia,serif;font-size:1.4rem}
+.howto{margin:10px 0 0;padding-left:20px}
+.howto li{margin:3px 0}
+
+@media (max-width:760px){
+  .sim.with-ctl{grid-template-columns:1fr}
+  .results,.two{grid-template-columns:1fr}
+  .cv-chrom{height:230px}
+  h1{font-size:1.5rem}
+}
+@media print{
+  .bar,.no-print,.step:not(.final){display:none!important}
+  body{background:#fff;color:#000}
+  .step.final{border:0}
+}
+</style>
+</head>
+<body>
+<div class="bar">
+  <div class="bar-in">
+    <span class="bar-title">Decisiones cromatográficas con evidencia</span>
+    <div class="progress" aria-live="polite"><div class="track"><span id="progFill" style="width:0"></span></div><small id="progTxt"></small></div>
+  </div>
+</div>
+<main id="steps"></main>
+
+<script>
+(function(){
+"use strict";
+const R=8.314;
+const STORE='cromato-actividad-guiada-v1';
+const $=id=>document.getElementById(id);
+const clone=o=>JSON.parse(JSON.stringify(o));
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function fmt(v,sig=3){
+  if(v===null||v===undefined||!isFinite(v)) return '—';
+  const a=Math.abs(v);
+  if(a>=1000) return Math.round(v).toLocaleString('es-MX');
+  if(a>=100) return v.toLocaleString('es-MX',{maximumFractionDigits:1});
+  if(a===0) return '0';
+  const d=Math.max(0,sig-1-Math.floor(Math.log10(a)));
+  return v.toLocaleString('es-MX',{minimumFractionDigits:Math.min(d,4),maximumFractionDigits:Math.min(d,4)});
+}
+const hhmm=t=>new Date(t).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+
+/* ================= MODELO ================= */
+const PRESETS={
+  capsa:{names:['Capsaicina','Dihidrocapsaicina'],s:{type:'packed',L:15,dc:4.6,eps:0.65,phi:0.12,df:0.25,F:1.0,H:15,T:30,A:{dH:-15,dS:-22.72},B:{dH:-17,dS:-28.75}}},
+  terp:{names:['Limoneno','1,8-Cineol'],s:{type:'open',L:3000,dc:0.25,eps:0.65,phi:0.12,df:0.25,F:1.2,H:300,T:80,A:{dH:-45,dS:-63.16},B:{dH:-48,dS:-70.96}}}
+};
+function simState(preset,mods){const p=PRESETS[preset];const s=clone(p.s);s.names=p.names.slice();Object.assign(s,mods||{});return s;}
+function compute(s){
+  const open=s.type==='open';
+  const A=Math.PI*Math.pow(s.dc/20,2);
+  const eps=open?1:s.eps;
+  const Vm=eps*A*s.L, u=s.F/(eps*A), tM=s.L/u;
+  const phi=open?4*s.df/(s.dc*1000):s.phi;
+  const TK=s.T+273.15, N=s.L*1e4/s.H;
+  const an=['A','B'].map((id,i)=>{const p=s[id];const dG=p.dH*1000-TK*p.dS;const KD=Math.exp(-dG/(R*TK));const k=KD*phi;const tR=tM*(1+k);const sigma=tR/Math.sqrt(N);
+    return {id,i,name:s.names[i],dG,KD,k,tR,tRp:tM*k,sigma,Wb:4*sigma,Wh:2.3548*sigma};});
+  const inverted=an[0].k>an[1].k;const p1=inverted?an[1]:an[0],p2=inverted?an[0]:an[1];
+  const alpha=p2.k/p1.k;
+  const Rs=(p2.tR-p1.tR)/(0.5*(p1.Wb+p2.Wb));
+  const RsP=Math.sqrt(N)/4*(alpha-1)/alpha*p2.k/(1+p2.k);
+  const tEnd=p2.tR+3*p2.sigma;
+  return {s,open,A,eps,Vm,u,tM,phi,TK,N,H:s.H,L:s.L,F:s.F,an,p1,p2,alpha,Rs,RsP,inverted,tEnd,solvent:s.F*tEnd};
+}
+const MYST=[
+  {id:'Fup',label:'Aumentó el flujo volumétrico F',f:s=>{s.F*=1.5;}},
+  {id:'Fdn',label:'Disminuyó el flujo volumétrico F',f:s=>{s.F*=0.6;}},
+  {id:'L',label:'Se usó una columna más larga con el mismo relleno',f:s=>{s.L*=2;}},
+  {id:'H',label:'Mejoró la eficiencia (H menor)',f:s=>{s.H*=0.4;}},
+  {id:'phi',label:'Aumentó la relación de fases (más fase estacionaria)',f:s=>{if(s.type==='open')s.df*=1.8;else s.phi*=1.8;}},
+  {id:'T',label:'Aumentó la temperatura de la columna',f:s=>{s.T+=15;}},
+  {id:'eps',label:'Aumentó la porosidad del lecho',f:s=>{s.eps=Math.min(0.9,s.eps+0.15);},packedOnly:true},
+  {id:'dc',label:'Disminuyó el diámetro interno de la columna',f:s=>{s.dc*=0.7;}}
+];
+const mystById=id=>MYST.find(m=>m.id===id);
+
+/* valores de referencia para calificar */
+const RC=compute(simState('capsa'));
+const RMICRO=compute(simState('capsa',{dc:2.1}));
+const RMONO=compute(simState('capsa',{eps:0.8}));
+const RT80=compute(simState('terp'));
+const RT100=compute(simState('terp',{T:100}));
+const Tmax=(()=>{let lo=80,hi=111;for(let i=0;i<40;i++){const m=(lo+hi)/2;const r=compute(simState('terp',{T:m}));if(r.Rs>=1.5)lo=m;else hi=m;}return lo;})();
+const tAtTmax=compute(simState('terp',{T:Tmax})).p2.tR;
+const Tcoel=(()=>{const s=PRESETS.terp.s;return (s.B.dH-s.A.dH)*1000/(s.B.dS-s.A.dS)-273.15;})();
+const Lreq=(()=>{const r=RC;const Nreq=16*2.25*Math.pow(r.alpha/(r.alpha-1),2)*Math.pow((1+r.p2.k)/r.p2.k,2);return Nreq*r.H/1e4;})();
+function arrowOf(a,b){const rel=(b-a)/Math.abs(a);if(Math.abs(rel)<0.005)return 'eq';return b>a?'up':'down';}
+const ARW={up:'↑',down:'↓',eq:'='};
+const ARWOPTS=[['','—'],['up','↑ aumenta'],['down','↓ disminuye'],['eq','= no cambia']];
+
+const MATRIX_ROWS=[['F','F'],['L','L'],['H','H'],['phi','V<sub>s</sub>/V<sub>m</sub>'],['T','T'],['eps','ε'],['dc','d<sub>c</sub> (F constante)']];
+const MATRIX_COLS=[['tM','t<sub>M</sub>'],['tR','t<sub>R</sub>'],['k','k'],['a','α'],['N','N'],['Wb','W<sub>b</sub>'],['Rs','R<sub>s</sub>']];
+const MATRIX_KEY={
+  F:['down','down','eq','eq','eq','down','eq'], L:['up','up','eq','eq','up','up','up'], H:['eq','eq','eq','eq','down','up','down'],
+  phi:['eq','up','up','eq','eq','up','up'], T:['eq','down','down','down','eq','down','down'], eps:['up','up','eq','eq','eq','up','eq'], dc:['up','up','eq','eq','eq','up','eq']};
+
+/* ================= PASOS ================= */
+const CAPSA_CASE=`<div class="case"><p><b>Caso.</b> Un laboratorio de control de calidad cuantifica capsaicina y dihidrocapsaicina en extractos de chile por HPLC en fase reversa (C18, 150 × 4.6 mm, ε = 0.65, F = 1.0 mL/min, 30 °C). La columna ya tiene uso y el analista sospecha que la separación no cumple.</p></div>`;
+const TERP_CASE=`<div class="case"><p><b>Caso.</b> Un laboratorio que certifica aceites esenciales de limón analiza limoneno y 1,8-cineol por GC capilar (30 m × 0.25 mm, d<sub>f</sub> = 0.25 µm, F = 1.2 mL/min). Son un par crítico en columnas poco polares. A 80 °C la corrida tarda más de 13 min y la gerencia pide acortarla subiendo la temperatura del horno.</p>
+<div class="tbl-scroll"><table><thead><tr><th>Analito</th><th>ΔH° (kJ/mol)</th><th>ΔS° (J/mol·K)</th></tr></thead><tbody><tr><td>Limoneno</td><td>−45.0</td><td>−63.16</td></tr><tr><td>1,8-Cineol</td><td>−48.0</td><td>−70.96</td></tr></tbody></table></div></div>`;
+
+const STEPS=[
+ {id:'inicio',kind:'start',block:'Inicio',title:'Datos del equipo',
+  intro:`<p>Esta actividad dura 90 minutos y avanza paso a paso. En cada bloque primero escriben su <b>predicción</b>; al enviarla queda <b>bloqueada</b> y solo entonces se abre la parte del simulador que corresponde. No podrán regresar a modificar respuestas enviadas: cada envío queda registrado con su hora.</p>
+  <p>Al terminar se genera un reporte que deben guardar como PDF y subir a Classroom.</p>`,
+  fields:[{id:'equipo',type:'line',label:'Nombre o número de equipo'},{id:'integrantes',type:'text',label:'Integrantes (nombre completo y código)',rows:3},{id:'grupo',type:'line',label:'Grupo o sección'}],
+  submit:'Comenzar la actividad'},
+
+ {id:'b1a',kind:'sim',block:'Bloque 1. Leer un cromatograma',title:'Medir en el cromatograma',
+  intro:CAPSA_CASE+`<p>El simulador muestra el cromatograma, pero <b>sin resultados numéricos</b>. Pasen el cursor sobre la gráfica para leer tiempos (arriba a la derecha aparece t). Las líneas horizontales marcan W<sub>h</sub> y las tangentes W<sub>b</sub>. La columna mide L = 15 cm.</p>
+  <div class="formula">k = (t<sub>R</sub> − t<sub>M</sub>)/t<sub>M</sub> &nbsp;·&nbsp; α = k<sub>2</sub>/k<sub>1</sub> &nbsp;·&nbsp; N = 5.54 (t<sub>R</sub>/W<sub>h</sub>)² &nbsp;·&nbsp; H = L/N &nbsp;·&nbsp; R<sub>s</sub> = 1.18 (t<sub>R2</sub> − t<sub>R1</sub>)/(W<sub>h1</sub> + W<sub>h2</sub>)</div>`,
+  sim:{preset:'capsa',panels:['col','chrom'],showW:true},
+  fields:[{type:'nums',items:[
+    {id:'tM',label:'t<sub>M</sub>',unit:'min',actual:()=>RC.tM,tol:.05},
+    {id:'tR1',label:'t<sub>R</sub> capsaicina',unit:'min',actual:()=>RC.an[0].tR,tol:.03},
+    {id:'tR2',label:'t<sub>R</sub> dihidrocapsaicina',unit:'min',actual:()=>RC.an[1].tR,tol:.03},
+    {id:'Wh1',label:'W<sub>h</sub> capsaicina',unit:'min',actual:()=>RC.an[0].Wh,tol:.1},
+    {id:'Wh2',label:'W<sub>h</sub> dihidrocapsaicina',unit:'min',actual:()=>RC.an[1].Wh,tol:.1},
+    {id:'k1',label:'k capsaicina',unit:'',actual:()=>RC.an[0].k,tol:.05},
+    {id:'k2',label:'k dihidrocapsaicina',unit:'',actual:()=>RC.an[1].k,tol:.05},
+    {id:'alpha',label:'α',unit:'',actual:()=>RC.alpha,tol:.02},
+    {id:'N',label:'N (del segundo pico)',unit:'',actual:()=>RC.N,tol:.2},
+    {id:'H',label:'H',unit:'µm',actual:()=>RC.H,tol:.2},
+    {id:'Rs',label:'R<sub>s</sub>',unit:'',actual:()=>RC.Rs,tol:.12}]}],
+  submit:'Enviar mediciones y ver los valores reales'},
+
+ {id:'b1b',kind:'sim',block:'Bloque 1. Leer un cromatograma',title:'Comparar con el simulador',
+  intro:`<p>Ahora ven los valores calculados por el simulador. Comparen con sus mediciones (la tabla de sus valores y la diferencia aparece en el paso anterior).</p>`,
+  sim:{preset:'capsa',panels:['chrom','tables'],showW:true},
+  fields:[
+   {id:'q1',type:'text',label:'1. ¿Por qué su N calculada con W<sub>h</sub> difiere de la del simulador? ¿Qué error pesa más en N: el de t<sub>R</sub> o el de W<sub>h</sub>? Justifiquen con la ecuación.'},
+   {id:'q2',type:'text',label:'2. R<sub>s</sub> con anchuras y R<sub>s</sub> de Purnell no coinciden exactamente. ¿Qué suposición hace Purnell sobre las anchuras de los dos picos?'},
+   {id:'q3',type:'text',label:'3. ¿Los valores de k están en el intervalo útil? Si k<sub>1</sub> fuera 0.5, ¿qué problema tendría la cuantificación de capsaicina en una matriz compleja?'},
+   {id:'q4',type:'text',label:'4. Conclusión del analista: ¿el método cumple el criterio de separación a línea base? ¿Qué número lo demuestra?'}],
+  submit:'Enviar y pasar al bloque 2'},
+
+ {id:'b2a',kind:'pred',block:'Bloque 2. Hidrodinámica',title:'Predicción: columna de 2.1 mm',
+  intro:`<div class="case"><p><b>Caso.</b> Para reducir el consumo de acetonitrilo, el jefe de laboratorio cambia la columna de 150 × 4.6 mm por una de 150 × 2.1 mm con el mismo relleno, pero el técnico deja el flujo en 1.0 mL/min.</p></div>
+  <div class="formula">u = F / (ε·π(d<sub>c</sub>/2)²) &nbsp;·&nbsp; t<sub>M</sub> = L/u = V<sub>m</sub>/F</div>`,
+  fields:[
+   {id:'arr',type:'arrows',label:'Respecto de la columna de 4.6 mm, ¿cada parámetro aumenta, disminuye o no cambia?',
+    params:[['tM','t<sub>M</sub>'],['u','u'],['tR','t<sub>R</sub>'],['k','k'],['a','α'],['Rs','R<sub>s</sub>']],
+    actual:()=>({tM:arrowOf(RC.tM,RMICRO.tM),u:arrowOf(RC.u,RMICRO.u),tR:arrowOf(RC.p2.tR,RMICRO.p2.tR),k:arrowOf(RC.p2.k,RMICRO.p2.k),a:arrowOf(RC.alpha,RMICRO.alpha),Rs:arrowOf(RC.Rs,RMICRO.Rs)})},
+   {type:'nums',items:[
+    {id:'Feq',label:'Flujo que conserva la u original',unit:'mL/min',actual:()=>1.0*Math.pow(2.1/4.6,2),tol:.03},
+    {id:'ahorro',label:'Ahorro de fase móvil por corrida con ese flujo',unit:'%',actual:()=>(1-Math.pow(2.1/4.6,2))*100,tol:.03}]}],
+  submit:'Enviar predicción y abrir el simulador'},
+
+ {id:'b2a-s',kind:'sim',block:'Bloque 2. Hidrodinámica',title:'Comprobación: columna de 2.1 mm',
+  intro:`<p>El simulador está cargado con la columna de 2.1 mm y F = 1.0 mL/min. La línea punteada es la columna original de 4.6 mm. Pueden mover F y d<sub>c</sub>, y usar la tabla de escalamiento.</p>`,
+  sim:{preset:'capsa',mods:{dc:2.1},ref:{preset:'capsa'},refLabel:'columna de 4.6 mm, F = 1.0 mL/min',controls:['F','dc'],panels:['col','chrom','tables','hydro']},
+  fields:[
+   {id:'q1',type:'text',label:'1. ¿En qué parámetros falló su predicción? Expliquen el razonamiento correcto.'},
+   {id:'q2',type:'text',label:'2. Ajusten F al valor que calcularon. ¿Se recupera el cromatograma original? ¿Qué cambia y qué no?'},
+   {id:'q3',type:'text',label:'3. Reflexión: el simulador dice que N no cambió aunque u se multiplicó casi por 5. ¿Le creen? ¿Qué debería pasarle a H en un equipo real?'}],
+  submit:'Enviar y continuar'},
+
+ {id:'b2b',kind:'pred',block:'Bloque 2. Hidrodinámica',title:'Predicción: columna monolítica',
+  intro:`<div class="case"><p><b>Caso.</b> Un proveedor ofrece una columna monolítica (ε ≈ 0.80) de las mismas dimensiones que la empacada (ε = 0.65), con el argumento de que "es más abierta y más rápida". Mismo flujo: 1.0 mL/min.</p></div>`,
+  fields:[
+   {id:'arr',type:'arrows',label:'Si el simulador mantiene V<sub>s</sub>/V<sub>m</sub> constante, ¿qué pasa con cada parámetro al pasar de ε = 0.65 a ε = 0.80?',
+    params:[['tM','t<sub>M</sub>'],['u','u'],['tR','t<sub>R</sub>'],['k','k']],
+    actual:()=>({tM:arrowOf(RC.tM,RMONO.tM),u:arrowOf(RC.u,RMONO.u),tR:arrowOf(RC.p2.tR,RMONO.p2.tR),k:arrowOf(RC.p2.k,RMONO.p2.k)})},
+   {type:'nums',items:[
+    {id:'phi',label:'Nueva V<sub>s</sub>/V<sub>m</sub> si V<sub>s</sub> fuera igual que en la empacada (antes 0.12)',unit:'',actual:()=>0.12*0.65/0.80,tol:.03},
+    {id:'k1',label:'k de capsaicina con esa relación (antes 3.00)',unit:'',actual:()=>RC.an[0].k*0.65/0.80,tol:.04}]}],
+  submit:'Enviar predicción y abrir el simulador'},
+
+ {id:'b2b-s',kind:'sim',block:'Bloque 2. Hidrodinámica',title:'Comprobación: porosidad',
+  intro:`<p>Columna monolítica (ε = 0.80). La línea punteada es la empacada (ε = 0.65). Pueden mover ε y F.</p>`,
+  sim:{preset:'capsa',mods:{eps:0.8},ref:{preset:'capsa'},refLabel:'columna empacada, ε = 0.65',controls:['eps','F'],panels:['col','chrom','tables','hydro']},
+  fields:[
+   {id:'q1',type:'text',label:'1. Expliquen por qué t<sub>M</sub> aumenta aunque la columna sea más porosa.'},
+   {id:'q2',type:'text',label:'2. Entonces, ¿en qué sentido sí puede ser "más rápida" una columna monolítica? Piensen en la presión necesaria para mover la fase móvil.'},
+   {id:'q3',type:'text',label:'3. En la tabla "abierta frente a empacada", con el mismo tubo y el mismo F, ¿por qué u es mayor en la empacada?'},
+   {id:'q4',type:'text',label:'4. Si una tubular abierta ofrece poca resistencia al flujo, ¿por qué en GC capilar se usan columnas de 30 m o más y en HPLC de 10 a 25 cm?'}],
+  submit:'Enviar y pasar al bloque 3'},
+
+ {id:'b3',kind:'pred',block:'Bloque 3. Termodinámica',title:'Predicción: subir la temperatura',
+  intro:TERP_CASE+`<div class="formula">ΔG° = ΔH° − TΔS° = −RT ln K<sub>D</sub> &nbsp;·&nbsp; k = K<sub>D</sub>·(V<sub>s</sub>/V<sub>m</sub>), con V<sub>s</sub>/V<sub>m</sub> = 4d<sub>f</sub>/d<sub>c</sub> &nbsp;·&nbsp; T<sub>α=1</sub> = Δ(ΔH°)/Δ(ΔS°)</div>`,
+  fields:[
+   {type:'nums',items:[
+    {id:'dG1',label:'ΔG° limoneno a 80 °C',unit:'kJ/mol',actual:()=>RT80.an[0].dG/1000,tol:.01},
+    {id:'dG2',label:'ΔG° 1,8-cineol a 80 °C',unit:'kJ/mol',actual:()=>RT80.an[1].dG/1000,tol:.01},
+    {id:'k1',label:'k limoneno a 80 °C',unit:'',actual:()=>RT80.an[0].k,tol:.05},
+    {id:'k2',label:'k 1,8-cineol a 80 °C',unit:'',actual:()=>RT80.an[1].k,tol:.05},
+    {id:'Tc',label:'Temperatura de coelución',unit:'°C',actual:()=>Tcoel,tol:.02}]},
+   {id:'arr',type:'arrows',label:'Si el horno pasa de 80 a 100 °C:',
+    params:[['tR','t<sub>R</sub>'],['k','k'],['a','α'],['Rs','R<sub>s</sub>']],
+    actual:()=>({tR:arrowOf(RT80.p2.tR,RT100.p2.tR),k:arrowOf(RT80.p2.k,RT100.p2.k),a:arrowOf(RT80.alpha,RT100.alpha),Rs:arrowOf(RT80.Rs,RT100.Rs)})},
+   {id:'q130',type:'text',label:'¿Qué esperan ver en el cromatograma a 130 °C? Justifiquen con su temperatura de coelución.'}],
+  submit:'Enviar predicción y abrir el simulador'},
+
+ {id:'b3-s',kind:'sim',block:'Bloque 3. Termodinámica',title:'Comprobación: temperatura y selectividad',
+  intro:`<p>GC capilar cargada a 80 °C (línea punteada). Muevan la temperatura y observen el gráfico de van't Hoff y la relación k<sub>B</sub>/k<sub>A</sub>.</p>`,
+  sim:{preset:'terp',ref:{preset:'terp'},refLabel:'80 °C',controls:['T'],panels:['col','chrom','tables','thermo']},
+  fields:[
+   {type:'nums',items:[
+    {id:'Tmax',label:'Temperatura máxima con R<sub>s</sub> ≥ 1.5',unit:'°C',actual:()=>Tmax,tol:.02},
+    {id:'ahorro',label:'Tiempo ahorrado respecto de 80 °C (último pico)',unit:'min',actual:()=>RT80.p2.tR-tAtTmax,tol:.08}]},
+   {id:'q1',type:'text',label:'1. Por encima de la temperatura de coelución el orden de elución se invierte. Explíquenlo con entalpía y entropía: ¿qué analito tiene la interacción más exotérmica y por qué pierde ventaja al calentar?'},
+   {id:'q2',type:'text',label:'2. Otro laboratorio transfiere el método y su horno opera 12 °C más caliente sin que nadie lo note. Identifican los picos solo por t<sub>R</sub>. ¿Qué error reportarían? ¿Qué control de calidad lo habría detectado?'}],
+  submit:'Enviar y pasar al bloque 4'},
+
+ {id:'b4',kind:'pred',block:'Bloque 4. Decisión con Purnell',title:'Predicción: ¿qué palanca mover?',
+  intro:`<div class="case"><p><b>Caso.</b> De vuelta a los capsaicinoides (R<sub>s</sub> ≈ 1.26). La norma interna exige R<sub>s</sub> ≥ 1.5 y no hay presupuesto para un equipo de ultra alta presión.</p></div>
+  <div class="formula">R<sub>s</sub> = (√N/4) · ((α − 1)/α) · (k<sub>2</sub>/(1 + k<sub>2</sub>))</div>
+  <p>Datos: α = 1.071, k<sub>2</sub> = 3.21, N = 10 000, H = 15 µm, L = 15 cm, t<sub>R</sub> del último pico = 6.82 min.</p>`,
+  fields:[
+   {type:'nums',items:[
+    {id:'L',label:'L necesaria para R<sub>s</sub> = 1.5 solo con eficiencia',unit:'cm',actual:()=>Lreq,tol:.04},
+    {id:'fac',label:'Factor por el que se multiplica el tiempo de análisis',unit:'×',actual:()=>Lreq/15,tol:.04}]},
+   {id:'rank',type:'text',label:'Ordenen de la más barata a la más cara estas estrategias y justifiquen: duplicar L, reducir H a la mitad, duplicar k, duplicar (α − 1), bajar F a la mitad, enfriar la columna.'}],
+  submit:'Enviar predicción y abrir el simulador'},
+
+ {id:'b4-s',kind:'sim',block:'Bloque 4. Decisión con Purnell',title:'Comprobación: estrategias y costos',
+  intro:`<p>Método de capsaicinoides. Pueden mover L, H, V<sub>s</sub>/V<sub>m</sub>, T y F, guardar referencias y consultar la tabla de estrategias.</p>`,
+  sim:{preset:'capsa',ref:{preset:'capsa'},refLabel:'método original',controls:['L','H','phi','T','F'],panels:['chrom','tables','purnell']},
+  fields:[
+   {id:'q1',type:'text',label:'1. Observen el gráfico de R<sub>s</sub> frente a k<sub>2</sub>. ¿Por qué aumentar k más allá de 10 casi no mejora la resolución?'},
+   {id:'q2',type:'text',label:'2. "Bajar F a la mitad" no cambia R<sub>s</sub> en el simulador. ¿Qué supuesto del modelo produce ese resultado? ¿Qué esperarían en un equipo real?'},
+   {id:'q3',type:'text',label:'3. ¿Enfriar o calentar la columna ayuda a separar los capsaicinoides? ¿Qué precio se paga?'},
+   {id:'q4',type:'text',label:'4. Recomendación al jefe de laboratorio (3 líneas, con números): estrategia elegida, R<sub>s</sub> y tiempo de análisis esperados, y riesgo de su propuesta.'}],
+  submit:'Enviar y pasar al bloque 5'},
+
+ {id:'b5',kind:'pred',block:'Bloque 5. Diagnóstico',title:'Matriz de predicción',
+  intro:`<p>Sin simulador, llenen la matriz: si aumenta el parámetro de la fila (y todo lo demás se mantiene), ¿qué pasa con cada columna? Después la usarán para diagnosticar tres cromatogramas misteriosos.</p>`,
+  fields:[{id:'mat',type:'matrix'}],
+  submit:'Enviar matriz e iniciar el diagnóstico'},
+
+ {id:'d1',kind:'diag',block:'Bloque 5. Diagnóstico',title:'Diagnóstico, ronda 1',base:'capsa',
+  intro:`<p>La línea punteada es el cromatograma original. Se aplicó un cambio oculto en un parámetro. No hay resultados numéricos: usen el cursor y su matriz.</p>`},
+ {id:'d2',kind:'diag',block:'Bloque 5. Diagnóstico',title:'Diagnóstico, ronda 2',base:'terp',
+  intro:`<p>Ahora con la columna capilar de GC. Mismo procedimiento.</p>`},
+ {id:'d3',kind:'diag',block:'Bloque 5. Diagnóstico',title:'Diagnóstico, ronda 3',base:'capsa',
+  intro:`<p>Última ronda.</p>`},
+
+ {id:'cierre',kind:'pred',block:'Cierre',title:'Boleto de salida',
+  intro:`<p>Respuesta breve, máximo tres líneas por pregunta.</p>`,
+  fields:[
+   {id:'q1',type:'text',label:'1. ¿Por qué una α de 1.02 es un reto analítico aunque la columna tenga 100 000 platos? Apóyense en Purnell.'},
+   {id:'q2',type:'text',label:'2. Un cambio en el flujo volumétrico, ¿puede modificar k? Justifiquen con la definición de k.'},
+   {id:'q3',type:'text',label:'3. Escriban una pregunta que les haya dejado el supuesto de que H no depende de la velocidad lineal.'}],
+  submit:'Terminar y generar el reporte'},
+
+ {id:'fin',kind:'final',block:'Reporte',title:'Reporte final'}
+];
+const DIAG_FIELDS=[
+  {id:'evid',type:'text',label:'Evidencia observada: ¿cambió t<sub>M</sub>? ¿todos los picos se desplazaron en la misma proporción? ¿cambió la separación relativa? ¿cambiaron las anchuras?'},
+  {id:'hyp',type:'select',label:'Hipótesis: ¿qué parámetro cambió?',options:MYST.map(m=>[m.id,m.label])}];
+function fieldsOf(st){return st.kind==='diag'?DIAG_FIELDS:(st.fields||[]);}
+
+/* ================= ESTADO ================= */
+let state={cur:0,ans:{},draft:{},time:{},myst:{},start:null};
+try{const raw=localStorage.getItem(STORE);if(raw){const o=JSON.parse(raw);if(o&&typeof o.cur==='number')state=Object.assign(state,o);}}catch(e){}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(state));}catch(e){}}
+
+/* ================= FORMULARIOS ================= */
+function arrowSelect(name,val){return `<select data-f="${name}" aria-label="predicción">${ARWOPTS.map(([v,l])=>`<option value="${v}" ${v===val?'selected':''}>${l}</option>`).join('')}</select>`;}
+function fieldHTML(st,f,d){
+  if(f.type==='nums') return `<div class="nums">${f.items.map(it=>`<div class="field" data-req="${it.id}"><label for="f_${st.id}_${it.id}">${it.label}</label><input type="number" step="any" id="f_${st.id}_${it.id}" data-f="${it.id}" value="${esc(d[it.id]??'')}">${it.unit?`<span class="unit">${it.unit}</span>`:''}</div>`).join('')}</div>`;
+  if(f.type==='line') return `<div class="field" data-req="${f.id}"><label for="f_${st.id}_${f.id}">${f.label}</label><input type="text" id="f_${st.id}_${f.id}" data-f="${f.id}" value="${esc(d[f.id]??'')}"></div>`;
+  if(f.type==='text') return `<div class="field" data-req="${f.id}"><label for="f_${st.id}_${f.id}">${f.label}</label><textarea id="f_${st.id}_${f.id}" data-f="${f.id}" rows="${f.rows||3}">${esc(d[f.id]??'')}</textarea></div>`;
+  if(f.type==='select') return `<div class="field" data-req="${f.id}"><label for="f_${st.id}_${f.id}">${f.label}</label><select id="f_${st.id}_${f.id}" data-f="${f.id}"><option value="">Elige una hipótesis…</option>${f.options.map(([v,l])=>`<option value="${v}" ${d[f.id]===v?'selected':''}>${l}</option>`).join('')}</select></div>`;
+  if(f.type==='arrows') return `<div class="field"><span class="lbl">${f.label}</span><div class="tbl-scroll"><table><thead><tr><th>Parámetro</th><th>Predicción</th></tr></thead><tbody>${f.params.map(([k,l])=>`<tr data-req="${f.id}.${k}"><td>${l}</td><td>${arrowSelect(f.id+'.'+k,d[f.id+'.'+k])}</td></tr>`).join('')}</tbody></table></div></div>`;
+  if(f.type==='matrix') return `<div class="field"><div class="tbl-scroll"><table><thead><tr><th>Si aumenta…</th>${MATRIX_COLS.map(c=>`<th>${c[1]}</th>`).join('')}</tr></thead><tbody>${MATRIX_ROWS.map(([r,rl])=>`<tr><td>${rl}</td>${MATRIX_COLS.map(([c])=>`<td data-req="mat.${r}.${c}"><select data-f="mat.${r}.${c}" aria-label="${r} ${c}">${[['','—'],['up','↑'],['down','↓'],['eq','=']].map(([v,l])=>`<option value="${v}" ${d['mat.'+r+'.'+c]===v?'selected':''}>${l}</option>`).join('')}</select></td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`;
+  return '';
+}
+function reqKeys(st){const ks=[];fieldsOf(st).forEach(f=>{
+  if(f.type==='nums')f.items.forEach(it=>ks.push(it.id));
+  else if(f.type==='arrows')f.params.forEach(([k])=>ks.push(f.id+'.'+k));
+  else if(f.type==='matrix')MATRIX_ROWS.forEach(([r])=>MATRIX_COLS.forEach(([c])=>ks.push('mat.'+r+'.'+c)));
+  else ks.push(f.id);});return ks;}
+
+/* vista de respuestas enviadas (también se usa en el reporte) */
+function markNum(v,act,tol){const x=parseFloat(v);if(!isFinite(x))return '';const dif=(x-act)/Math.abs(act);return {dif,ok:Math.abs(dif)<=tol};}
+function doneHTML(st){
+  const a=state.ans[st.id]||{};let h='';
+  if(st.kind==='diag'){
+    const real=mystById(state.myst[st.id]);const ok=a.hyp===state.myst[st.id];
+    h+=`<div class="qa"><b>Evidencia</b><span class="ans">${esc(a.evid)}</span></div>`;
+    h+=`<div class="qa"><b>Hipótesis</b>${esc(mystById(a.hyp)?.label||'—')} <span class="${ok?'ok':'no'}">${ok?'✓ correcta':'✗ incorrecta'}</span></div>`;
+    h+=`<div class="qa"><b>Cambio real</b>${esc(real?.label||'—')}</div>`;
+    return h;}
+  fieldsOf(st).forEach(f=>{
+    if(f.type==='nums'){
+      const hasAct=f.items.some(it=>it.actual);
+      h+=`<div class="tbl-scroll"><table><thead><tr><th>Dato</th><th>Su valor</th>${hasAct?'<th>Simulador</th><th>Diferencia</th>':''}</tr></thead><tbody>`+
+        f.items.map(it=>{const v=a[it.id];let c='';if(it.actual){const act=it.actual();const m=markNum(v,act,it.tol);c=`<td>${fmt(act,4)}</td><td class="${m.ok?'ok':'no'}">${m?(m.dif>=0?'+':'')+fmt(m.dif*100,2)+' %':'—'}</td>`;}
+          return `<tr><td>${it.label}${it.unit?' ('+it.unit+')':''}</td><td>${esc(v)}</td>${c}</tr>`;}).join('')+'</tbody></table></div>';
+    } else if(f.type==='arrows'){
+      const act=f.actual();
+      h+=`<div class="qa"><b>${f.label}</b></div><div class="tbl-scroll"><table><thead><tr><th>Parámetro</th><th>Predicción</th><th>Simulador</th><th></th></tr></thead><tbody>`+
+        f.params.map(([k,l])=>{const p=a[f.id+'.'+k];const ok=p===act[k];return `<tr><td>${l}</td><td>${ARW[p]||'—'}</td><td>${ARW[act[k]]}</td><td class="${ok?'ok':'no'}">${ok?'✓':'✗'}</td></tr>`;}).join('')+'</tbody></table></div>';
+    } else if(f.type==='matrix'){
+      let okc=0;
+      const rows=MATRIX_ROWS.map(([r,rl])=>`<tr><td>${rl}</td>${MATRIX_COLS.map(([c],j)=>{const p=a['mat.'+r+'.'+c];const k=MATRIX_KEY[r][j];const ok=p===k;if(ok)okc++;return `<td class="${ok?'ok':'no'}">${ARW[p]||'—'}${ok?'':' <small>('+ARW[k]+')</small>'}</td>`;}).join('')}</tr>`).join('');
+      h+=`<p>Coincidencias con el modelo: <b>${okc} de 49</b>. Entre paréntesis, la respuesta del modelo.</p><div class="tbl-scroll"><table><thead><tr><th>Si aumenta…</th>${MATRIX_COLS.map(c=>`<th>${c[1]}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+    } else {
+      const v=f.type==='select'?(f.options.find(o=>o[0]===a[f.id])||[,''])[1]:a[f.id];
+      h+=`<div class="qa"><b>${f.label}</b><span class="ans">${esc(v)}</span></div>`;
+    }
+  });
+  return h;
+}
+
+/* ================= RENDER DE PASOS ================= */
+function render(){
+  const main=$('steps');main.innerHTML='';SIM=null;
+  const total=STEPS.length-1;
+  $('progFill').style.width=Math.min(100,state.cur/total*100)+'%';
+  $('progTxt').textContent=state.cur>=total?'Actividad terminada':`Paso ${state.cur+1} de ${total}: ${STEPS[state.cur].block}`;
+  STEPS.forEach((st,i)=>{
+    if(i>state.cur)return;
+    if(i<state.cur){
+      const d=document.createElement('details');d.className='step';if(i===state.cur-1)d.open=true;
+      const mins=state.start?Math.round((state.time[st.id]-state.start)/60000):0;
+      d.innerHTML=`<summary><span><b>${st.block}</b> · ${st.title}</span><span class="when">Enviado ${hhmm(state.time[st.id])}${st.id!=='inicio'?` (min ${mins})`:''}</span></summary><div class="done-body">${doneHTML(st)}</div>`;
+      main.appendChild(d);return;}
+    const sec=document.createElement('section');sec.className='step current'+(st.kind==='final'?' final':'');
+    if(st.kind==='final'){sec.innerHTML=finalHTML();main.appendChild(sec);wireFinal();return;}
+    const tag=st.kind==='pred'?'<span class="tag pred">Predicción: sin simulador</span>':st.kind==='sim'?'<span class="tag sim">Simulador abierto</span>':st.kind==='diag'?'<span class="tag diag">Diagnóstico</span>':'';
+    const d=state.draft[st.id]||{};
+    sec.innerHTML=`<div class="step-body"><div class="kicker"><span>${st.block}</span>${tag}</div><h2>${st.title}</h2>${st.intro||''}
+      ${st.sim||st.kind==='diag'?'<div class="simwrap"></div>':''}
+      ${fieldsOf(st).map(f=>fieldHTML(st,f,d)).join('')}
+      <div class="actions"><button class="btn primary" id="submitBtn">${st.submit||'Enviar diagnóstico'}</button><span class="err" id="errMsg" role="alert"></span></div>
+      <p class="lock-note">Al enviar, estas respuestas quedan bloqueadas.</p></div>`;
+    main.appendChild(sec);
+    sec.querySelectorAll('[data-f]').forEach(el=>el.addEventListener('input',()=>{(state.draft[st.id]=state.draft[st.id]||{})[el.dataset.f]=el.value;save();}));
+    $('submitBtn').addEventListener('click',()=>submit(st,sec));
+    if(st.kind==='diag'){
+      if(!state.myst[st.id]){const base=PRESETS[st.base].s;const opts=MYST.filter(m=>!(m.packedOnly&&base.type!=='packed'));
+        const used=Object.values(state.myst);let pool=opts.filter(m=>!used.includes(m.id));if(!pool.length)pool=opts;
+        state.myst[st.id]=pool[Math.floor(Math.random()*pool.length)].id;save();}
+      mountSim(sec.querySelector('.simwrap'),{preset:st.base,ref:{preset:st.base},refLabel:'cromatograma original',mystery:mystById(state.myst[st.id]),panels:['col','chrom']});
+    } else if(st.sim) mountSim(sec.querySelector('.simwrap'),st.sim);
+  });
+  const c=main.querySelector('.step.current');if(c&&state.cur>0)c.scrollIntoView({block:'start'});
+}
+function submit(st,sec){
+  const d=state.draft[st.id]||{};const miss=reqKeys(st).filter(k=>!(d[k]!==undefined&&String(d[k]).trim()!==''));
+  sec.querySelectorAll('.missing').forEach(e=>e.classList.remove('missing'));
+  if(miss.length){miss.forEach(k=>{const el=sec.querySelector(`[data-req="${CSS.escape(k)}"]`);if(el)el.classList.add('missing');});
+    $('errMsg').textContent=`Faltan ${miss.length} respuesta(s) marcadas en rojo.`;return;}
+  state.ans[st.id]=clone(d);state.time[st.id]=Date.now();if(st.id==='inicio')state.start=state.time[st.id];
+  state.cur++;save();stopPlay();render();
+}
+
+/* ================= SIMULADOR (una instancia a la vez) ================= */
+let SIM=null;
+const SPEC={
+  L:{label:'Longitud, L',unit:'cm',packed:[3,50,0.5],open:[500,6000,50]},
+  dc:{label:'Diámetro interno, d<sub>c</sub>',unit:'mm',packed:[1,10,0.1],open:[0.1,0.53,0.01]},
+  eps:{label:'Porosidad, ε',unit:'',packed:[0.35,0.9,0.01]},
+  phi:{label:'V<sub>s</sub>/V<sub>m</sub>',unit:'',packed:[0.02,0.5,0.005]},
+  F:{label:'Flujo, F',unit:'mL/min',packed:[0.05,3,0.01],open:[0.2,5,0.05]},
+  H:{label:'Altura de plato, H',unit:'µm',packed:[3,100,0.5],open:[100,2000,10]},
+  T:{label:'Temperatura',unit:'°C',packed:[5,90,1],open:[30,250,1]}
+};
+const q=sel=>SIM.root.querySelector(sel);
+function mountSim(root,cfg){
+  SIM={root,cfg,S:simState(cfg.preset,cfg.mods),ghost:cfg.ref?compute(simState(cfg.ref.preset,cfg.ref.mods)):null,mystery:cfg.mystery||null,tFrac:1,playing:false,hoverT:null,cur:null};
+  const P=new Set(cfg.panels);const ctl=(cfg.controls||[]).length>0;
+  let h=`<div class="sim ${ctl?'with-ctl':''}">`;
+  if(ctl) h+=`<aside class="sim-ctl"><h4>Controles</h4><div class="ctl-list"></div></aside>`;
+  h+=`<div class="sim-main">`;
+  if(ctl) h+=`<div class="toolbar"><button class="btn" data-act="ref">Guardar como referencia</button><button class="btn" data-act="reset">Restablecer el caso</button></div>`;
+  if(SIM.ghost) h+=`<p class="legend">Línea punteada: <span class="refLab">${cfg.refLabel||'referencia'}</span>.</p>`;
+  if(P.has('col')) h+=`<figure><figcaption>Interior de la columna</figcaption><canvas class="cv-col"></canvas><div class="timebar"><button class="btn" data-act="play">Inyectar</button><input type="range" class="tSlider" min="0" max="1000" value="1000" aria-label="Tiempo"><output class="tOut"></output></div></figure>`;
+  if(P.has('chrom')) h+=`<figure><figcaption>Cromatograma (pasa el cursor para leer el tiempo)</figcaption><div class="readout"></div><canvas class="cv-chrom"></canvas></figure>`;
+  if(P.has('tables')) h+=`<div class="results"><div class="panel"><h4>Por analito</h4><table class="tblAn"></table></div><div class="panel"><h4>Sistema</h4><table class="tblSys"></table><div class="flags"></div></div></div>`;
+  if(P.has('hydro')) h+=`<div class="two"><div class="panel"><h4>Mismo tubo y F: abierta o empacada</h4><table class="tblHydro"></table></div><div class="panel"><h4>Escalar a otro diámetro</h4><p style="margin:0 0 6px">Nuevo d<sub>c</sub>: <input type="number" class="dc2" step="0.01" value="4.6" style="width:80px"> mm</p><table class="tblScale"></table></div></div>`;
+  if(P.has('thermo')) h+=`<div class="panel"><table class="tblThermo"></table><div class="thermoFlag"></div></div><div class="two"><figure><figcaption>van't Hoff: ln K<sub>D</sub> frente a 1000/T</figcaption><canvas class="cv-vh cv-std"></canvas></figure><figure><figcaption>k<sub>B</sub>/k<sub>A</sub> frente a T (sombreado: orden invertido)</figcaption><canvas class="cv-alpha cv-std"></canvas></figure></div>`;
+  if(P.has('purnell')) h+=`<div class="two"><div class="panel"><h4>Las tres palancas</h4><div class="meters"></div></div><div class="panel"><h4>Para llegar a R<sub>s</sub> = 1.5</h4><table class="tblReq"></table></div></div><div class="panel"><h4>Estrategias desde el estado actual</h4><div class="tbl-scroll"><table class="tblStrat"></table></div></div><figure><figcaption>R<sub>s</sub> frente a k<sub>2</sub> (banda: 2 ≤ k ≤ 10)</figcaption><canvas class="cv-rsk cv-std"></canvas></figure>`;
+  h+=`</div></div>`;
+  root.innerHTML=h;
+  if(ctl){const list=q('.ctl-list');cfg.controls.forEach(k=>buildCtl(list,k));
+    q('[data-act=ref]').addEventListener('click',()=>{SIM.ghost=compute(effective());const l=q('.refLab');if(l)l.textContent='referencia guardada por ustedes';else{const p=document.createElement('p');p.className='legend';p.innerHTML='Línea punteada: <span class="refLab">referencia guardada por ustedes</span>.';q('.sim-main').insertBefore(p,q('.sim-main').children[1]);}simUpdate();});
+    q('[data-act=reset]').addEventListener('click',()=>{SIM.S=simState(cfg.preset,cfg.mods);SIM.ghost=cfg.ref?compute(simState(cfg.ref.preset,cfg.ref.mods)):null;const l=q('.refLab');if(l)l.textContent=cfg.refLabel||'referencia';refreshCtl();simUpdate();});}
+  if(P.has('col')){q('[data-act=play]').addEventListener('click',togglePlay);q('.tSlider').addEventListener('input',e=>{stopPlay();SIM.tFrac=e.target.value/1000;drawCol();if(q('.cv-chrom'))drawChrom();});}
+  if(P.has('chrom')){const cv=q('.cv-chrom');cv.addEventListener('mousemove',e=>{const F=SIM.F;if(!F)return;const rc=cv.getBoundingClientRect();SIM.hoverT=(e.clientX-rc.left-F.pl)/(rc.width-F.pl-F.pr)*xmaxAll();drawChrom();});
+    cv.addEventListener('mouseleave',()=>{SIM.hoverT=null;drawChrom();});
+    cv.addEventListener('touchmove',e=>{const F=SIM.F;if(!F)return;const t=e.touches[0];const rc=cv.getBoundingClientRect();SIM.hoverT=(t.clientX-rc.left-F.pl)/(rc.width-F.pl-F.pr)*xmaxAll();drawChrom();e.preventDefault();},{passive:false});}
+  if(P.has('hydro')){const d2=q('.dc2');d2.value=SIM.S.dc===4.6?2.1:4.6;d2.addEventListener('input',()=>renderHydro());}
+  refreshCtl();simUpdate();
+}
+function effective(){const s=clone(SIM.S);if(SIM.mystery)SIM.mystery.f(s);return s;}
+function rangeOf(k){return SPEC[k][SIM.S.type]||SPEC[k].packed;}
+function buildCtl(list,key){
+  const sp=SPEC[key];const d=document.createElement('div');d.className='ctl';d.dataset.key=key;
+  d.innerHTML=`<label>${sp.label}</label><div class="ctl-row"><input type="range" aria-label="${sp.label.replace(/<[^>]+>/g,'')}"><input type="number" aria-label="${sp.label.replace(/<[^>]+>/g,'')} valor"><span class="u">${sp.unit}</span></div>`;
+  list.appendChild(d);
+  const rng=d.querySelector('[type=range]'),num=d.querySelector('[type=number]');
+  rng.addEventListener('input',()=>{SIM.S[key]=parseFloat(rng.value);refreshCtl();simUpdate();});
+  num.addEventListener('change',()=>{const v=parseFloat(num.value);if(isFinite(v)&&v>0){SIM.S[key]=v;}refreshCtl();simUpdate();});
+}
+function refreshCtl(){SIM.root.querySelectorAll('.ctl').forEach(d=>{const k=d.dataset.key;const [mn,mx,st]=rangeOf(k);const v=SIM.S[k];
+  const rng=d.querySelector('[type=range]'),num=d.querySelector('[type=number]');rng.min=mn;rng.max=mx;rng.step=st;rng.value=Math.min(mx,Math.max(mn,v));
+  if(document.activeElement!==num)num.value=+v.toFixed(4);num.step=st;});}
+function simUpdate(){if(!SIM)return;SIM.cur=compute(effective());
+  if(q('.cv-col'))drawCol();if(q('.cv-chrom'))drawChrom();if(q('.tblAn'))renderTables();if(q('.tblHydro'))renderHydro();if(q('.tblThermo'))renderThermo();if(q('.tblStrat'))renderPurnell();}
+
+function colors(){const cs=getComputedStyle(document.documentElement);const g=n=>cs.getPropertyValue(n).trim();
+  return {ink:g('--ink'),muted:g('--muted'),line:g('--line'),glass:g('--glass'),glassSoft:g('--glass-soft'),a:g('--a'),b:g('--b'),ghost:g('--ghost'),bad:g('--bad'),shade:g('--shade')};}
+function setup(cv){const r=cv.getBoundingClientRect();const dpr=window.devicePixelRatio||1;cv.width=Math.max(1,Math.round(r.width*dpr));cv.height=Math.max(1,Math.round(r.height*dpr));
+  const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,r.width,r.height);return {ctx,w:r.width,h:r.height};}
+function ticks(mn,mx,n=5){const span=mx-mn;if(span<=0)return[mn];const st0=span/n;const mag=Math.pow(10,Math.floor(Math.log10(st0)));const r=st0/mag;
+  const st=(r<1.5?1:r<3?2:r<7?5:10)*mag;const out=[];for(let v=Math.ceil(mn/st)*st;v<=mx+st*1e-6;v+=st)out.push(+v.toPrecision(10));return out;}
+function tickLab(t,r){const tk=ticks(r[0],r[1],6);const st=tk.length>1?Math.abs(tk[1]-tk[0]):1;const d=Math.max(0,-Math.floor(Math.log10(st)+1e-9));return t.toLocaleString('es-MX',{minimumFractionDigits:Math.min(d,3),maximumFractionDigits:Math.min(d,3)});}
+function frame(ctx,w,h,xr,yr,xl,yl,C,opt={}){
+  const pl=opt.pl||56,pr=14,pt=14,pb=40;
+  const X=v=>pl+(v-xr[0])/(xr[1]-xr[0])*(w-pl-pr);const Y=v=>h-pb-(v-yr[0])/(yr[1]-yr[0])*(h-pt-pb);
+  ctx.font='12px "Atkinson Hyperlegible",system-ui,sans-serif';ctx.strokeStyle=C.line;ctx.fillStyle=C.muted;ctx.lineWidth=1;
+  ticks(xr[0],xr[1],opt.nx||6).forEach(t=>{const x=X(t);ctx.beginPath();ctx.moveTo(x,pt);ctx.lineTo(x,h-pb);ctx.globalAlpha=.35;ctx.stroke();ctx.globalAlpha=1;ctx.textAlign='center';ctx.fillText(tickLab(t,xr),x,h-pb+15);});
+  if(!opt.noY)ticks(yr[0],yr[1],4).forEach(t=>{const y=Y(t);ctx.beginPath();ctx.moveTo(pl,y);ctx.lineTo(w-pr,y);ctx.globalAlpha=.35;ctx.stroke();ctx.globalAlpha=1;ctx.textAlign='right';ctx.fillText(tickLab(t,yr),pl-6,y+4);});
+  ctx.strokeStyle=C.muted;ctx.beginPath();ctx.moveTo(pl,pt);ctx.lineTo(pl,h-pb);ctx.lineTo(w-pr,h-pb);ctx.stroke();
+  ctx.fillStyle=C.ink;ctx.textAlign='center';ctx.fillText(xl,(pl+w-pr)/2,h-6);
+  ctx.save();ctx.translate(13,(pt+h-pb)/2);ctx.rotate(-Math.PI/2);ctx.fillText(yl,0,0);ctx.restore();
+  return {X,Y,pl,pr,pt,pb};
+}
+const peakH=a=>1/(a.sigma*Math.sqrt(2*Math.PI));
+function signal(t,r,ym){let y=0;r.an.forEach(a=>{y+=peakH(a)*Math.exp(-((t-a.tR)**2)/(2*a.sigma*a.sigma));});const sm=r.tM/Math.sqrt(r.N);y+=0.2*ym*Math.exp(-((t-r.tM)**2)/(2*sm*sm));return y;}
+function xmaxAll(){return Math.max(SIM.cur.tEnd,SIM.ghost?SIM.ghost.tEnd:0)*1.08;}
+function drawChrom(){
+  const cv=q('.cv-chrom');const {ctx,w,h}=setup(cv);const C=colors();const r=SIM.cur,g=SIM.ghost;const xmax=xmaxAll();
+  let ym=Math.max(...r.an.map(peakH));if(g)ym=Math.max(ym,...g.an.map(peakH));
+  const F=frame(ctx,w,h,[0,xmax],[0,ym*1.22],'Tiempo (min)','Señal (u. a.)',C,{noY:true,pl:34});SIM.F=F;
+  const n=Math.min(1400,Math.round(w*2));
+  const path=(fn,t0,t1)=>{ctx.beginPath();for(let i=0;i<=n;i++){const t=t0+(t1-t0)*i/n;const x=F.X(t),y=F.Y(fn(t));i?ctx.lineTo(x,y):ctx.moveTo(x,y);}};
+  if(g){ctx.save();ctx.setLineDash([5,4]);ctx.strokeStyle=C.ghost;ctx.lineWidth=1.6;path(t=>signal(t,g,ym),0,xmax);ctx.stroke();ctx.restore();}
+  const tNow=SIM.tFrac*xmax;
+  ctx.save();ctx.beginPath();ctx.rect(0,0,F.X(tNow),h);ctx.clip();
+  r.an.forEach(a=>{const col=a.i===0?C.a:C.b;const lo=Math.max(0,a.tR-5*a.sigma),hi=Math.min(xmax,a.tR+5*a.sigma);const gg=t=>peakH(a)*Math.exp(-((t-a.tR)**2)/(2*a.sigma*a.sigma));
+    path(gg,lo,hi);ctx.lineTo(F.X(hi),F.Y(0));ctx.lineTo(F.X(lo),F.Y(0));ctx.closePath();ctx.fillStyle=col;ctx.globalAlpha=.2;ctx.fill();ctx.globalAlpha=1;path(gg,lo,hi);ctx.strokeStyle=col;ctx.lineWidth=1.2;ctx.stroke();});
+  path(t=>signal(t,r,ym),0,xmax);ctx.strokeStyle=C.ink;ctx.lineWidth=2;ctx.stroke();ctx.restore();
+  ctx.font='12px "Atkinson Hyperlegible",system-ui,sans-serif';ctx.textAlign='center';
+  if(tNow>=r.tM){ctx.fillStyle=C.muted;ctx.fillText('tM',F.X(r.tM),F.Y(0.2*ym)-8);}
+  r.an.forEach((a,idx)=>{if(tNow<a.tR)return;const col=a.i===0?C.a:C.b;ctx.fillStyle=col;const other=r.an[1-idx];const close=Math.abs(a.tR-other.tR)<3*a.sigma;
+    ctx.fillText(a.name,F.X(a.tR),F.Y(peakH(a))-8+(close&&a===r.p2?-16:0));
+    if(SIM.cfg.showW){const hh=peakH(a);ctx.strokeStyle=col;ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(F.X(a.tR-2*a.sigma),F.Y(0));ctx.lineTo(F.X(a.tR),F.Y(1.213*hh));ctx.lineTo(F.X(a.tR+2*a.sigma),F.Y(0));ctx.stroke();ctx.setLineDash([]);
+      ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(F.X(a.tR-1.1774*a.sigma),F.Y(hh/2));ctx.lineTo(F.X(a.tR+1.1774*a.sigma),F.Y(hh/2));ctx.stroke();}});
+  if(SIM.tFrac<1){ctx.strokeStyle=C.glass;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(F.X(tNow),F.pt);ctx.lineTo(F.X(tNow),h-F.pb);ctx.stroke();}
+  const ro=q('.readout');
+  if(SIM.hoverT!==null&&SIM.hoverT>=0&&SIM.hoverT<=xmax){ctx.strokeStyle=C.muted;ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(F.X(SIM.hoverT),F.pt);ctx.lineTo(F.X(SIM.hoverT),h-F.pb);ctx.stroke();ctx.setLineDash([]);ro.textContent='t = '+fmt(SIM.hoverT,4)+' min';}else ro.textContent='';
+}
+const dots=[];(function(){let s=7;const rnd=()=>{s=(s*16807)%2147483647;return s/2147483647;};for(let i=0;i<520;i++)dots.push([rnd(),rnd(),rnd()]);})();
+function drawCol(){
+  const cv=q('.cv-col');const {ctx,w,h}=setup(cv);const C=colors();const r=SIM.cur;
+  const x0=74,x1=w-74,y0=24,y1=h-30,W=x1-x0;
+  ctx.fillStyle=C.glassSoft;ctx.strokeStyle=C.glass;ctx.lineWidth=1.5;ctx.beginPath();ctx.rect(x0,y0,W,y1-y0);ctx.fill();ctx.stroke();
+  if(!r.open){ctx.fillStyle=C.glass;ctx.globalAlpha=.28;dots.forEach(d=>{ctx.beginPath();ctx.arc(x0+d[0]*W,y0+3+d[1]*(y1-y0-6),1.2+d[2]*1.6,0,7);ctx.fill();});ctx.globalAlpha=1;}
+  else{ctx.fillStyle=C.glass;ctx.globalAlpha=.55;const th=Math.max(2,Math.min(7,r.s.df*3));ctx.fillRect(x0,y0,W,th);ctx.fillRect(x0,y1-th,W,th);ctx.globalAlpha=1;}
+  const t=SIM.tFrac*xmaxAll();const z0=r.u*t/r.L;
+  if(z0<=1){ctx.strokeStyle=C.muted;ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(x0+z0*W,y0);ctx.lineTo(x0+z0*W,y1);ctx.stroke();ctx.setLineDash([]);}
+  const status=[];
+  r.an.forEach(a=>{const col=a.i===0?C.a:C.b;const zc=r.u*t/(1+a.k)/r.L;if(zc>1.02){status.push([a,'eluido']);return;}status.push([a,Math.round(zc*100)+' % de L']);
+    const sig=Math.sqrt(r.H*1e-4*Math.max(zc*r.L,1e-9))/r.L;const sp=Math.max(1.3,sig*W);const amp=Math.min(.95,3.5/sp);
+    const lo=Math.max(0,Math.floor(zc*W-4*sp)),hi=Math.min(W,Math.ceil(zc*W+4*sp));ctx.fillStyle=col;
+    for(let px=lo;px<=hi;px++){const I=amp*Math.exp(-((px-zc*W)**2)/(2*sp*sp));if(I<.02)continue;ctx.globalAlpha=I;ctx.fillRect(x0+px,y0+(a.i===0?4:(y1-y0)/2),1.2,(y1-y0)/2-4);}
+    ctx.globalAlpha=1;});
+  ctx.font='12px "Atkinson Hyperlegible",system-ui,sans-serif';ctx.fillStyle=C.muted;ctx.textAlign='right';ctx.fillText('Inyección',x0-8,(y0+y1)/2+4);ctx.textAlign='left';ctx.fillText('Detector',x1+8,(y0+y1)/2+4);
+  let lx=x0;status.forEach(([a,st])=>{ctx.fillStyle=a.i===0?C.a:C.b;const txt=`${a.name}: ${st}`;ctx.fillText(txt,lx,h-9);lx+=ctx.measureText(txt).width+22;});
+  const o=q('.tOut');if(o)o.textContent='t = '+fmt(t,3)+' min';
+}
+function stopPlay(){if(!SIM)return;SIM.playing=false;const b=SIM.root.querySelector('[data-act=play]');if(b)b.textContent='Inyectar';}
+function togglePlay(){if(SIM.playing){stopPlay();return;}SIM.playing=true;q('[data-act=play]').textContent='Pausar';if(SIM.tFrac>=1)SIM.tFrac=0;const st=performance.now()-SIM.tFrac*9000;const me=SIM;
+  const step=now=>{if(SIM!==me||!me.playing)return;me.tFrac=Math.min(1,(now-st)/9000);q('.tSlider').value=Math.round(me.tFrac*1000);drawCol();if(q('.cv-chrom'))drawChrom();if(me.tFrac<1)requestAnimationFrame(step);else stopPlay();};
+  requestAnimationFrame(step);}
+
+function delta(v,g){if(g===undefined||g===null||!isFinite(g)||!isFinite(v)||g===0)return '';const p=(v-g)/Math.abs(g)*100;if(Math.abs(p)<0.05)return '<span class="delta">sin cambio</span>';
+  return `<span class="delta ${p>0?'up':'down'}">${p>0?'▲':'▼'} ${fmt(Math.abs(p),2)} %</span>`;}
+function renderTables(){
+  const r=SIM.cur,g=SIM.ghost;
+  const rowsA=[['t<sub>R</sub> (min)','tR'],["t'<sub>R</sub> (min)",'tRp'],['K<sub>D</sub>','KD'],['k','k'],['W<sub>b</sub> (min)','Wb'],['W<sub>h</sub> (min)','Wh']];
+  let html=`<thead><tr><th></th><th><span class="dot" style="background:var(--a)"></span>${r.an[0].name}</th><th><span class="dot" style="background:var(--b)"></span>${r.an[1].name}</th></tr></thead><tbody>`;
+  rowsA.forEach(([lab,k])=>{html+=`<tr><td>${lab}</td>`+r.an.map((a,i)=>`<td>${fmt(a[k],k==='KD'?4:3)}${g?delta(a[k],g.an[i][k]):''}</td>`).join('')+'</tr>';});
+  q('.tblAn').innerHTML=html+'</tbody>';
+  const rowsS=[['t<sub>M</sub> (min)',x=>x.tM],['V<sub>m</sub> (mL)',x=>x.Vm],['u (mm/s)',x=>x.u*10/60],['V<sub>s</sub>/V<sub>m</sub>',x=>x.phi],['N',x=>x.N],['H (µm)',x=>x.H],['α',x=>x.alpha,4],
+    ['R<sub>s</sub> (con W<sub>b</sub>)',x=>x.Rs],['R<sub>s</sub> (Purnell)',x=>x.RsP],['Fase móvil por corrida (mL)',x=>x.solvent]];
+  html='<tbody>';rowsS.forEach(([lab,fn,sig])=>{html+=`<tr><td>${lab}</td><td>${fmt(fn(r),sig||3)}${g?delta(fn(r),fn(g)):''}</td></tr>`;});q('.tblSys').innerHTML=html+'</tbody>';
+  const fl=[];if(r.inverted)fl.push(['bad',`Orden de elución invertido: ${r.an[1].name} sale antes.`]);
+  if(r.alpha<1.0005)fl.push(['bad','α ≈ 1: coelución.']);else if(r.Rs>=1.5)fl.push(['good','Separación a línea base (R<sub>s</sub> ≥ 1.5).']);else fl.push(['bad','R<sub>s</sub> < 1.5: los picos se traslapan.']);
+  if(r.p1.k<1)fl.push(['bad','k < 1: el primer pico sale muy cerca de t<sub>M</sub>.']);if(r.p2.k>10)fl.push(['bad','k > 10: retención excesiva.']);
+  q('.flags').innerHTML=fl.map(([c,t])=>`<p class="flag ${c}">${t}</p>`).join('');
+}
+function renderHydro(){
+  const s=SIM.cur.s;const A=Math.PI*Math.pow(s.dc/20,2);const epsP=s.type==='packed'?s.eps:0.65;
+  const c=e=>{const Vm=e*A*s.L;const u=s.F/(e*A);return {Vm,u,tM:s.L/u};};const o=c(1),p=c(epsP);
+  q('.tblHydro').innerHTML=`<thead><tr><th></th><th>Abierta (ε = 1)</th><th>Empacada (ε = ${fmt(epsP)})</th></tr></thead><tbody>
+   <tr><td>ε·A (mm²)</td><td>${fmt(A*100)}</td><td>${fmt(epsP*A*100)}</td></tr><tr><td>V<sub>m</sub> (mL)</td><td>${fmt(o.Vm)}</td><td>${fmt(p.Vm)}</td></tr>
+   <tr><td>u (mm/s)</td><td>${fmt(o.u*10/60)}</td><td>${fmt(p.u*10/60)}</td></tr><tr><td>t<sub>M</sub> (min)</td><td>${fmt(o.tM)}</td><td>${fmt(p.tM)}</td></tr></tbody>`;
+  const dc2=parseFloat(q('.dc2').value)||s.dc;const F2=s.F*Math.pow(dc2/s.dc,2);
+  q('.tblScale').innerHTML=`<tbody><tr><td>F para conservar u</td><td>${fmt(F2)} mL/min</td></tr><tr><td>u con F = ${fmt(s.F)} mL/min</td><td>${fmt(s.F/(SIM.cur.eps*Math.PI*Math.pow(dc2/20,2))*10/60)} mm/s</td></tr><tr><td>u actual</td><td>${fmt(SIM.cur.u*10/60)} mm/s</td></tr></tbody>`;
+}
+function renderThermo(){
+  const r=SIM.cur,s=r.s;const [Tmin,Tmax2]=rangeOf('T');
+  q('.tblThermo').innerHTML=`<thead><tr><th>T = ${fmt(s.T)} °C</th><th><span class="dot" style="background:var(--a)"></span>${r.an[0].name}</th><th><span class="dot" style="background:var(--b)"></span>${r.an[1].name}</th></tr></thead><tbody>
+   <tr><td>ΔG° (kJ/mol)</td>${r.an.map(a=>`<td>${fmt(a.dG/1000,4)}</td>`).join('')}</tr><tr><td>K<sub>D</sub></td>${r.an.map(a=>`<td>${fmt(a.KD,4)}</td>`).join('')}</tr><tr><td>k</td>${r.an.map(a=>`<td>${fmt(a.k)}</td>`).join('')}</tr>
+   <tr><td>k<sub>B</sub>/k<sub>A</sub></td><td colspan="2">${fmt(r.an[1].k/r.an[0].k,4)}</td></tr></tbody>`;
+  const lnK=(p,TK)=>-(p.dH*1000-TK*p.dS)/(R*TK);const Tx=(s.B.dH-s.A.dH)*1000/(s.B.dS-s.A.dS);
+  q('.thermoFlag').innerHTML='';
+  let o=setup(q('.cv-vh'));const C=colors();const x0=1000/(Tmax2+273.15),x1=1000/(Tmin+273.15);
+  const ys=[];for(const p of [s.A,s.B])for(const TC of [Tmin,Tmax2])ys.push(lnK(p,TC+273.15));const ymn=Math.min(...ys),ymx=Math.max(...ys),pad=(ymx-ymn)*.12||1;
+  let F=frame(o.ctx,o.w,o.h,[x0,x1],[ymn-pad,ymx+pad],'1000/T (K⁻¹)','ln KD',C);
+  [[s.A,C.a],[s.B,C.b]].forEach(([p,col])=>{o.ctx.beginPath();o.ctx.moveTo(F.X(x0),F.Y(lnK(p,1000/x0)));o.ctx.lineTo(F.X(x1),F.Y(lnK(p,1000/x1)));o.ctx.strokeStyle=col;o.ctx.lineWidth=2;o.ctx.stroke();
+    o.ctx.fillStyle=col;o.ctx.beginPath();o.ctx.arc(F.X(1000/r.TK),F.Y(lnK(p,r.TK)),5,0,7);o.ctx.fill();});
+  o.ctx.strokeStyle=C.muted;o.ctx.setLineDash([3,3]);o.ctx.beginPath();o.ctx.moveTo(F.X(1000/r.TK),F.pt);o.ctx.lineTo(F.X(1000/r.TK),o.h-F.pb);o.ctx.stroke();o.ctx.setLineDash([]);
+  if(isFinite(Tx)&&1000/Tx>=x0&&1000/Tx<=x1){o.ctx.strokeStyle=C.bad;o.ctx.lineWidth=2;o.ctx.beginPath();o.ctx.arc(F.X(1000/Tx),F.Y(lnK(s.A,Tx)),7,0,7);o.ctx.stroke();}
+  o=setup(q('.cv-alpha'));const aOf=TC=>Math.exp(lnK(s.B,TC+273.15)-lnK(s.A,TC+273.15));const av=[];for(let i=0;i<=100;i++)av.push(aOf(Tmin+(Tmax2-Tmin)*i/100));
+  const amn=Math.min(...av,.98),amx=Math.max(...av,1.02),ap=(amx-amn)*.1;F=frame(o.ctx,o.w,o.h,[Tmin,Tmax2],[amn-ap,amx+ap],'Temperatura (°C)','kB / kA',C);
+  o.ctx.fillStyle=C.shade;o.ctx.fillRect(F.pl,F.Y(1),o.w-F.pl-F.pr,F.Y(amn-ap)-F.Y(1));
+  o.ctx.strokeStyle=C.bad;o.ctx.setLineDash([5,4]);o.ctx.beginPath();o.ctx.moveTo(F.pl,F.Y(1));o.ctx.lineTo(o.w-F.pr,F.Y(1));o.ctx.stroke();o.ctx.setLineDash([]);
+  o.ctx.beginPath();av.forEach((v,i)=>{const x=F.X(Tmin+(Tmax2-Tmin)*i/100),y=F.Y(v);i?o.ctx.lineTo(x,y):o.ctx.moveTo(x,y);});o.ctx.strokeStyle=C.glass;o.ctx.lineWidth=2;o.ctx.stroke();
+  o.ctx.fillStyle=C.ink;o.ctx.beginPath();o.ctx.arc(F.X(s.T),F.Y(aOf(s.T)),5,0,7);o.ctx.fill();
+}
+const purnell=(N,a,k)=>Math.sqrt(N)/4*(a-1)/a*k/(1+k);
+function renderPurnell(){
+  const r=SIM.cur;const eff=Math.sqrt(r.N)/4,sel=(r.alpha-1)/r.alpha,ret=r.p2.k/(1+r.p2.k);
+  const m=(l,v,mx,t)=>`<div class="meter"><div class="lr"><span>${l}</span><span>${t}</span></div><div class="mb"><span style="width:${Math.max(1,Math.min(100,v/mx*100))}%"></span></div></div>`;
+  q('.meters').innerHTML=m('√N/4',eff,Math.max(eff,100),fmt(eff))+m('(α − 1)/α',sel,Math.max(sel,.2),fmt(sel))+m('k<sub>2</sub>/(1 + k<sub>2</sub>)',ret,1,fmt(ret))+`<p style="margin:6px 0 0">R<sub>s</sub> (Purnell) = <b>${fmt(r.RsP)}</b></p>`;
+  const Nreq=16*2.25*Math.pow(r.alpha/(r.alpha-1),2)*Math.pow((1+r.p2.k)/r.p2.k,2);const L2=Nreq*r.H/1e4;
+  q('.tblReq').innerHTML=`<tbody><tr><td>N necesario</td><td>${fmt(Nreq)}</td></tr><tr><td>L necesaria</td><td>${fmt(L2)} cm</td></tr><tr><td>Factor de tiempo</td><td>× ${fmt(L2/r.L)}</td></tr></tbody>`;
+  const tb=r.p2.tR;const S=[['Estado actual',r.RsP,tb],['Duplicar L',purnell(2*r.N,r.alpha,r.p2.k),2*tb],['Reducir H a la mitad',purnell(2*r.N,r.alpha,r.p2.k),tb],['Duplicar k',purnell(r.N,r.alpha,2*r.p2.k),r.tM*(1+2*r.p2.k)],['Duplicar (α − 1)',purnell(r.N,1+2*(r.alpha-1),r.p2.k),tb],['Bajar F a la mitad',r.RsP,2*tb]];
+  q('.tblStrat').innerHTML='<thead><tr><th>Estrategia</th><th>R<sub>s</sub></th><th>t<sub>R</sub> último pico (min)</th></tr></thead><tbody>'+S.map(([a,b,c])=>`<tr><td>${a}</td><td>${fmt(b)}</td><td>${fmt(c)}</td></tr>`).join('')+'</tbody>';
+  const {ctx,w,h}=setup(q('.cv-rsk'));const C=colors();const kmax=Math.max(20,r.p2.k*1.3);const f=k=>purnell(r.N,r.alpha,k);const ymax=Math.max(f(kmax),1.5)*1.15;
+  const F=frame(ctx,w,h,[0,kmax],[0,ymax],'k₂','Rs',C);ctx.fillStyle=C.shade;ctx.fillRect(F.X(2),F.pt,F.X(Math.min(10,kmax))-F.X(2),h-F.pt-F.pb);
+  ctx.strokeStyle=C.bad;ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(F.pl,F.Y(1.5));ctx.lineTo(w-F.pr,F.Y(1.5));ctx.stroke();ctx.setLineDash([]);
+  ctx.beginPath();for(let i=0;i<=300;i++){const k=0.02+kmax*i/300;const x=F.X(k),y=F.Y(f(k));i?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.strokeStyle=C.glass;ctx.lineWidth=2;ctx.stroke();
+  ctx.fillStyle=C.ink;ctx.beginPath();ctx.arc(F.X(r.p2.k),F.Y(r.RsP),5,0,7);ctx.fill();
+}
+
+/* ================= REPORTE ================= */
+function scores(){
+  let aOk=0,aTot=0,nOk=0,nTot=0,mOk=0,dOk=0;
+  STEPS.forEach(st=>{const a=state.ans[st.id]||{};
+    if(st.kind==='diag'){if(a.hyp===state.myst[st.id])dOk++;return;}
+    (st.fields||[]).forEach(f=>{
+      if(f.type==='arrows'){const act=f.actual();f.params.forEach(([k])=>{aTot++;if(a[f.id+'.'+k]===act[k])aOk++;});}
+      if(f.type==='nums')f.items.forEach(it=>{if(!it.actual)return;nTot++;const m=markNum(a[it.id],it.actual(),it.tol);if(m&&m.ok)nOk++;});
+      if(f.type==='matrix')MATRIX_ROWS.forEach(([r])=>MATRIX_COLS.forEach(([c],j)=>{if(a['mat.'+r+'.'+c]===MATRIX_KEY[r][j])mOk++;}));
+    });});
+  return {aOk,aTot,nOk,nTot,mOk,dOk};
+}
+function reportBody(){
+  const i=state.ans.inicio||{};const sc=scores();const end=state.time.cierre||Date.now();
+  let h=`<h1>Reporte: Decisiones cromatográficas con evidencia</h1>
+  <p><b>Equipo:</b> ${esc(i.equipo)} &nbsp; <b>Grupo:</b> ${esc(i.grupo)}<br><b>Integrantes:</b> <span class="ans">${esc(i.integrantes)}</span><br>
+  <b>Fecha:</b> ${new Date(state.start||Date.now()).toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'})} &nbsp; <b>Inicio:</b> ${state.start?hhmm(state.start):'—'} &nbsp; <b>Fin:</b> ${hhmm(end)} &nbsp; <b>Duración:</b> ${state.start?Math.round((end-state.start)/60000):'—'} min</p>
+  <div class="summary-grid"><div><b>${sc.aOk}/${sc.aTot}</b>predicciones de tendencia correctas</div><div><b>${sc.nOk}/${sc.nTot}</b>cálculos dentro de tolerancia</div><div><b>${sc.mOk}/49</b>celdas de la matriz</div><div><b>${sc.dOk}/3</b>diagnósticos correctos</div></div>
+  <p style="font-size:.85rem">Las comparaciones usan el modelo del simulador. Tolerancias: 2 % a 20 % según el dato (las lecturas en pantalla admiten más error).</p>`;
+  let lastBlock='';
+  STEPS.forEach(st=>{if(st.id==='inicio'||st.kind==='final'||!state.time[st.id])return;
+    if(st.block!==lastBlock){h+=`<h2 style="margin-top:22px">${st.block}</h2>`;lastBlock=st.block;}
+    h+=`<h3>${st.title} <small style="font-weight:400">(enviado ${hhmm(state.time[st.id])}, minuto ${Math.round((state.time[st.id]-state.start)/60000)})</small></h3>${doneHTML(st)}`;});
+  return h;
+}
+function reportDoc(){
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Reporte ${esc((state.ans.inicio||{}).equipo)}</title>
+<style>body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;max-width:820px;margin:24px auto;padding:0 18px;color:#16232A;line-height:1.5;font-size:14px}
+h1{font-family:Georgia,serif;font-size:22px}h2{font-family:Georgia,serif;font-size:18px;border-bottom:2px solid #2B5E88;padding-bottom:3px}h3{font-size:15px;margin:14px 0 6px}
+table{border-collapse:collapse;width:100%;margin:6px 0 10px;font-size:13px}th,td{border:1px solid #CAD4D0;padding:4px 6px;text-align:center}th:first-child,td:first-child{text-align:left}
+.ok{color:#2F7D4E;font-weight:700}.no{color:#B23A3A;font-weight:700}.qa{margin:0 0 10px}.qa b{display:block}.ans{white-space:pre-wrap}
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.summary-grid div{background:#EEF3F7;padding:8px;border-radius:6px;font-size:12px}.summary-grid b{display:block;font-size:18px}
+.printbtn{position:fixed;right:16px;top:16px;padding:10px 16px;background:#2B5E88;color:#fff;border:0;border-radius:8px;font-size:14px;cursor:pointer}
+@media print{.printbtn{display:none}h3{break-after:avoid}table{break-inside:avoid}}</style></head>
+<body><button class="printbtn" onclick="window.print()">Imprimir o guardar como PDF</button>${reportBody()}</body></html>`;
+}
+function reportText(){const tmp=document.createElement('div');tmp.innerHTML=reportBody();tmp.querySelectorAll('tr').forEach(tr=>{tr.append(' ');});return tmp.innerText;}
+function finalHTML(){
+  return `<div class="step-body"><div class="kicker"><span>Reporte</span></div><h2>Actividad terminada</h2>
+  <p>Para entregar en Classroom:</p>
+  <ol class="howto no-print"><li>Pulsen <b>Descargar reporte</b> y acepten la descarga.</li><li>Abran el archivo descargado y pulsen <b>Imprimir o guardar como PDF</b>; elijan "Guardar como PDF".</li><li>Suban el PDF a la tarea de Classroom (una entrega por equipo, con los nombres de todos).</li></ol>
+  <div class="actions no-print"><button class="btn primary" id="dlBtn" hidden>Descargar reporte</button><button class="btn" id="prBtn">Imprimir esta página</button><button class="btn" id="cpBtn">Copiar reporte como texto</button><span class="err" id="dlMsg" role="status"></span></div>
+  <hr style="margin:20px 0;border:0;border-top:1px solid var(--line)"><div class="report">${reportBody()}</div></div>`;
+}
+function wireFinal(){
+  const msg=$('dlMsg');
+  $('prBtn').addEventListener('click',()=>{try{window.print();}catch(e){msg.textContent='La impresión directa no está disponible aquí; usen Descargar reporte.';}});
+  $('cpBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(reportText());msg.textContent='Reporte copiado. Péguenlo en un documento y guárdenlo como PDF.';}catch(e){msg.textContent='No se pudo copiar automáticamente; seleccionen el texto del reporte y cópienlo.';}});
+  if(window.claude&&typeof window.claude.use==='function'){
+    window.claude.use('downloads').then(dl=>{if(!dl)return;const b=$('dlBtn');if(!b)return;b.hidden=false;
+      b.addEventListener('click',async()=>{const eq=((state.ans.inicio||{}).equipo||'equipo').replace(/[^\p{L}\p{N} _-]/gu,'').trim()||'equipo';
+        try{await dl.save({filename:`Reporte cromatografia - ${eq}.html`,data:reportDoc()});msg.textContent='Reporte descargado. Ábranlo y guárdenlo como PDF.';}
+        catch(e){const c=e&&e.code;msg.textContent=c==='declined'?'Descarga cancelada. Pueden intentarlo de nuevo.':c==='rate_limited'?'Esperen un momento y vuelvan a intentarlo.':'La descarga no está disponible aquí; usen Imprimir o Copiar.';}});});
+  }
+}
+
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>simUpdate(),120);});
+if(window.matchMedia)window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>simUpdate());
+render();
+})();
+</script>
+</body>
+</html>
