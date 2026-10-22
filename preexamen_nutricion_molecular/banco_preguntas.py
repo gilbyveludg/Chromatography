@@ -1,38 +1,37 @@
 # -*- coding: utf-8 -*-
-"""Banco de reactivos del preexamen de Nutrición Molecular (Otoño 2026).
+"""Banco de reactivos del preexamen «Del Genoma Crudo a la Clínica» (Nutrición Molecular, Otoño 2026).
 
-Unidades cubiertas:
-  I.   Polimorfismos y nutrigenética (Dry Lab 1: PCR in silico, PCR-RFLP)
-  II.  Estrés oxidativo y antioxidantes (DPPH, TAC/FRAP, catalasa, SOD, Nrf2)
-  III. Epigenética y nutrición (metilación, ciclo de un carbono, histonas, miRNAs)
+Cuatro bloques con el peso del examen:
+  1. Opción múltiple: fundamentos moleculares y ómicos ............. 30 %
+  2. Casos clínicos y diagnóstico nutrigenético ..................... 30 %
+  3. Bioinformática, PCR in silico e interpretación de geles ......... 20 %
+  4. Cálculo químico-enzimático, capacidad antioxidante y troubleshooting 20 %
 
-Cada reactivo es un dict; `generar_qti.py` lo convierte a QTI 1.2 para Canvas.
+Cada reactivo es un dict; `generar_qti.py` lo convierte a QTI 1.2 para Canvas y
+`exportar_json.py` + `generar_word.js` producen el Word con la clave.
 Los casos y valores son distintos a los ejemplos vistos en clase.
 """
 
-TITULO = "Preexamen · Nutrición Molecular (Unidades I–III)"
+TITULO = "Preexamen · Del Genoma Crudo a la Clínica (Nutrición Molecular)"
 
 DESCRIPCION = """
-<p><strong>Preexamen de práctica.</strong> Está pensado para resolverse en <strong>3 horas</strong>, igual que el examen.
-Cubre las unidades vistas hasta ahora:</p>
+<p><strong>Preexamen de práctica.</strong> Tiene la misma estructura y duración que el examen (<strong>3 horas</strong>), con casos y datos distintos.</p>
 <ol>
-<li>Polimorfismos y nutrigenética (Dry Lab 1: PCR <em>in silico</em>, PCR-RFLP, frecuencias alélicas).</li>
-<li>Estrés oxidativo y antioxidantes (DPPH, TAC/FRAP, catalasa, SOD, Nrf2).</li>
-<li>Epigenética y nutrición (metilación del DNA, ciclo de un carbono, histonas, miRNAs, evidencia humana).</li>
+<li>Bloque 1 · Opción múltiple: fundamentos moleculares y ómicos (30 %).</li>
+<li>Bloque 2 · Casos clínicos y diagnóstico nutrigenético (30 %).</li>
+<li>Bloque 3 · Bioinformática, PCR <em>in silico</em> e interpretación de geles (20 %).</li>
+<li>Bloque 4 · Cálculo químico-enzimático, capacidad antioxidante y troubleshooting (20 %).</li>
 </ol>
 <p>Casi ninguna pregunta se responde de memoria: piden interpretar datos, detectar errores y justificar con el mecanismo.
 Al enviar verás la retroalimentación de cada reactivo; léela aunque hayas acertado.</p>
 """
 
-# Distribución sugerida del tiempo (minutos), se muestra en las instrucciones.
 TIEMPOS = [
-    ("I. Opción múltiple razonada (25)", 50),
-    ("II. Selección múltiple (6)", 18),
-    ("III. Relación de columnas (3)", 12),
-    ("IV. Cadenas mecanísticas (3)", 12),
-    ("V. Cálculos (7)", 30),
-    ("VI. Respuesta extendida (4)", 48),
-    ("Revisión final", 10),
+    ("Bloque 1 · Opción múltiple (15 reactivos, 30 pts)", 30),
+    ("Bloque 2 · Casos clínicos (10 reactivos, 30 pts)", 55),
+    ("Bloque 3 · Bioinformática y geles (9 reactivos, 20 pts)", 40),
+    ("Bloque 4 · Cálculo y troubleshooting (10 reactivos, 20 pts)", 40),
+    ("Revisión final", 15),
 ]
 
 
@@ -45,16 +44,21 @@ def _tabla(encabezados, filas):
     return f"<table style='border-collapse:collapse;margin:8px 0'><tr>{th}</tr>{trs}</table>"
 
 
+def _seq(texto):
+    return f"<code>{texto}</code>"
+
+
 INSTRUCCIONES = (
     "<h3>Instrucciones</h3>"
     "<ul>"
-    "<li>Tiempo límite: <strong>180 minutos</strong>. Puedes usar calculadora; no necesitas otras fuentes.</li>"
+    "<li>Tiempo límite: <strong>180 minutos</strong>. Puedes usar calculadora y una tabla del código genético; no necesitas otras fuentes.</li>"
     "<li>Reactivos de cálculo: escribe solo el número, con punto decimal y sin unidades.</li>"
-    "<li>Respuesta extendida: se califica el razonamiento (mecanismo, uso de los datos, límites de la evidencia), no la extensión.</li>"
+    "<li>Selección múltiple: marca todas las correctas; Canvas da crédito parcial y descuenta las marcadas de más.</li>"
+    "<li>Casos de respuesta extendida: se califica el razonamiento (mecanismo, uso de los datos, límites de la evidencia y propuesta), no la extensión.</li>"
     "<li>Puedes repetir el preexamen; Canvas conserva tu mejor intento.</li>"
     "</ul>"
     "<p><strong>Distribución sugerida del tiempo</strong></p>"
-    + _tabla(["Sección", "Minutos"], [(s, m) for s, m in TIEMPOS])
+    + _tabla(["Bloque", "Minutos"], [(s, m) for s, m in TIEMPOS])
 )
 
 # ---------------------------------------------------------------------------
@@ -74,12 +78,12 @@ def header(texto):
     REACTIVOS.append({"type": "header", "text": texto})
 
 
-def mc(titulo, texto, opciones, correcta, fb, puntos=1.6):
+def mc(titulo, texto, opciones, correcta, fb, puntos=2.0):
     REACTIVOS.append({"type": "mc", "title": titulo, "text": texto, "choices": opciones,
                       "correct": correcta, "fb": fb, "points": puntos})
 
 
-def ma(titulo, texto, opciones, correctas, fb, puntos=2.0):
+def ma(titulo, texto, opciones, correctas, fb, puntos=3.0):
     REACTIVOS.append({"type": "ma", "title": titulo, "text": texto, "choices": opciones,
                       "correct": correctas, "fb": fb, "points": puntos})
 
@@ -89,7 +93,7 @@ def matching(titulo, texto, pares, distractores, fb, puntos=3.0):
                       "distractors": distractores, "fb": fb, "points": puntos})
 
 
-def dropdowns(titulo, texto, blancos, fb, puntos=3.0):
+def dropdowns(titulo, texto, blancos, fb, puntos=2.0):
     REACTIVOS.append({"type": "dropdowns", "title": titulo, "text": texto, "blanks": blancos,
                       "fb": fb, "points": puntos})
 
@@ -99,592 +103,610 @@ def numerical(titulo, texto, respuesta, tolerancia, fb, puntos=2.0):
                       "tol": tolerancia, "fb": fb, "points": puntos})
 
 
-def essay(titulo, texto, fb, puntos=4.0):
+def essay(titulo, texto, fb, puntos=6.0):
     REACTIVOS.append({"type": "essay", "title": titulo, "text": texto, "fb": fb, "points": puntos})
+
+
+def _fb(correcta, porque, demas):
+    """Retroalimentación: la correcta con su justificación y por qué fallan las demás."""
+    items = "".join(f"<li>{d}</li>" for d in demas)
+    return (f"<p><strong>Correcta: {correcta}</strong> {porque}</p>"
+            f"<p><strong>Por qué no las demás:</strong></p><ul>{items}</ul>")
 
 
 header(INSTRUCCIONES)
 
 # ===========================================================================
-# SECCIÓN I · OPCIÓN MÚLTIPLE RAZONADA
+# BLOQUE 1 · OPCIÓN MÚLTIPLE: FUNDAMENTOS MOLECULARES Y ÓMICOS (30 pts)
 # ===========================================================================
-header("<h3>Sección I · Opción múltiple razonada</h3>"
-       "<p>25 reactivos, 1.6 puntos cada uno. Elige la opción <em>mejor justificada</em>; "
-       "varias pueden sonar correctas, pero solo una resiste el análisis.</p>")
+header("<h3>Bloque 1 · Fundamentos moleculares y ómicos (30 %)</h3>"
+       "<p>15 reactivos de opción múltiple, 2 puntos cada uno. Elige la opción <em>mejor justificada</em>.</p>")
 
-# ---- Unidad I: polimorfismos y nutrigenética ------------------------------
+mc("B1-1 · ¿Qué capa ómica responde la pregunta?",
+   "<p>Un equipo quiere saber si un yogur fermentado cambia, a las 2 horas de consumirlo, las concentraciones plasmáticas de ácidos grasos de cadena corta, "
+   "aminoácidos y ácidos biliares. ¿Qué enfoque responde de forma más directa esa pregunta?</p>",
+   ["Genómica del voluntario (secuenciación de su DNA).",
+    "Transcriptómica de leucocitos (RNA-seq).",
+    "Metabolómica plasmática (LC-MS o RMN).",
+    "Epigenómica de leucocitos (metilación de CpG)."],
+   2,
+   _fb("metabolómica.", "La pregunta es sobre moléculas pequeñas circulantes a muy corto plazo; la metabolómica las mide directamente y es la capa más cercana al fenotipo y a la dieta.",
+       ["Genómica: el DNA del voluntario no cambia en 2 horas; describe el potencial, no la respuesta aguda.",
+        "Transcriptómica: mide RNA mensajero, un paso intermedio; un cambio de transcritos no informa la concentración de metabolitos.",
+        "Epigenómica: la metilación cambia en escalas más largas y tampoco cuantifica metabolitos."]))
 
-mc("I-1 · Nutrigenética o nutrigenómica",
-   "<p>El estudio A da 2 g/día de EPA+DHA a 40 voluntarios y mide por RNA-seq qué genes inflamatorios cambian en sus linfocitos. "
-   "El estudio B compara cuánto bajan los triglicéridos con la misma dosis entre portadores y no portadores de una variante de <em>FADS1</em>.</p>"
-   "<p>¿Cuál clasificación es correcta?</p>",
-   ["A es nutrigenómica (efecto del nutriente sobre la expresión); B es nutrigenética (efecto del genotipo sobre la respuesta al nutriente).",
-    "A es nutrigenética y B es nutrigenómica, porque B mide un gen y A mide miles.",
-    "Ambos son nutrigenómica, porque los dos usan un nutriente como intervención.",
-    "Ambos son nutrigenética, porque en los dos hay variación genética entre voluntarios."],
+mc("B1-2 · Dogma central y regulación",
+   "<p>En adultos con genotipo de no persistencia de lactasa, el promotor de <em>LCT</em> en el epitelio intestinal se hipermetila con la edad y baja el mRNA de lactasa. "
+   "¿Qué afirmación describe mejor ese fenómeno dentro del dogma central?</p>",
+   ["Es una mutación adquirida del gen <em>LCT</em> que cambia la proteína.",
+    "Es una regulación epigenética: la secuencia no cambia, pero la metilación del promotor reduce la transcripción (DNA → RNA); se detectaría con epigenómica y transcriptómica.",
+    "Es un cambio postraduccional de la lactasa que la inactiva.",
+    "Es un cambio en el código genético que hace que el ribosoma no lea el mRNA de lactasa."],
+   1,
+   _fb("regulación epigenética de la transcripción.", "La metilación de CpG en promotores reduce el acceso de la maquinaria transcripcional sin alterar la secuencia. El efecto aparece como menos mRNA y menos proteína.",
+       ["«Mutación adquirida»: la secuencia de LCT no cambia; la metilación es una marca química sobre la citosina.",
+        "«Cambio postraduccional»: actuaría sobre la proteína ya formada; aquí lo que baja es el mRNA.",
+        "«Cambio en el código genético»: el código es universal; la lectura del mRNA no es el paso afectado."]))
+
+mc("B1-3 · Un SNP sinónimo",
+   "<p>Un SNP cambia el codón CTG por CTA; ambos codifican leucina. Un alumno afirma que, por ser sinónimo, «no puede tener ningún efecto biológico». ¿Cuál es la mejor respuesta?</p>",
+   ["Tiene razón: si el aminoácido no cambia, la proteína es idéntica y no hay efecto posible.",
+    "No necesariamente: un cambio sinónimo puede alterar sitios de splicing, la estabilidad del mRNA o la velocidad de traducción por uso de codones, aunque la mayoría son neutros.",
+    "Es incorrecto porque todo SNP sinónimo es en realidad un nonsense.",
+    "Un SNP sinónimo siempre cambia la proteína porque modifica el marco de lectura."],
+   1,
+   _fb("puede tener efecto, aunque casi siempre es neutro.", "«Sinónimo» describe solo el efecto sobre el aminoácido. El mRNA sí cambia, y eso puede afectar procesamiento o traducción.",
+       ["«No hay efecto posible»: confunde la secuencia proteica con todo lo que hace el mRNA.",
+        "«Es un nonsense»: nonsense significa crear un codón de paro; CTA codifica leucina.",
+        "«Cambia el marco de lectura»: una sustitución de una base no corre el marco; eso lo hacen los indels que no son múltiplos de 3."]))
+
+mc("B1-4 · Nonsense frente a missense",
+   "<p>Dos pacientes tienen variantes en el codón 120 de una enzima de 450 aminoácidos: el paciente 1 tiene CAG→CAT (Gln→His) y el paciente 2 tiene CAG→TAG. "
+   "¿Qué predicción es más razonable?</p>",
+   ["Ambas variantes tienen el mismo efecto porque afectan el mismo codón.",
+    "La del paciente 2 introduce un codón de paro prematuro; lo esperable es una proteína truncada o un mRNA degradado por NMD, con pérdida de función más grave que el cambio Gln→His.",
+    "La del paciente 1 es más grave porque His tiene carga.",
+    "La del paciente 2 es sinónima, porque TAG también codifica glutamina."],
+   1,
+   _fb("nonsense con pérdida de función.", "TAG es codón de paro. Un paro en el codón 120 de 450 elimina casi toda la proteína y suele activar el decaimiento del mRNA mediado por nonsense (NMD).",
+       ["«Mismo efecto»: el codón es el mismo, pero el cambio resultante es distinto (missense vs. nonsense).",
+        "«His es más grave»: un missense puede ser grave o neutro según el sitio; no hay base para suponerlo peor que perder la proteína.",
+        "«TAG codifica glutamina»: TAG es uno de los tres codones de paro."]))
+
+mc("B1-5 · Indels y marco de lectura",
+   "<p>En un exón se encuentran dos deleciones distintas: una de 1 nucleótido y otra de 3 nucleótidos. ¿Qué consecuencia es más probable para cada una?</p>",
+   ["Ambas corren el marco de lectura.",
+    "La de 1 nt corre el marco (cambia todos los aminoácidos siguientes y suele crear un paro prematuro); la de 3 nt elimina un aminoácido sin correr el marco.",
+    "La de 3 nt corre el marco y la de 1 nt no.",
+    "Ninguna afecta la proteína porque los indels solo ocurren en intrones."],
+   1,
+   _fb("la de 1 nt es frameshift; la de 3 nt es in-frame.", "El ribosoma lee de 3 en 3; quitar un número de bases que no es múltiplo de 3 desplaza la lectura.",
+       ["«Ambas corren el marco»: 3 nt es un codón completo.",
+        "«Al revés»: invierte la regla del múltiplo de 3.",
+        "«Solo en intrones»: los indels pueden ocurrir en cualquier región; en exones tienen el mayor efecto."]))
+
+mc("B1-6 · Variación en número de copias (CNV)",
+   "<p>Las poblaciones con dietas tradicionalmente altas en almidón tienden a tener más copias del gen de amilasa salival <em>AMY1</em>, y el número de copias se asocia con la cantidad de amilasa en saliva. ¿Qué tipo de variante es y qué ilustra?</p>",
+   ["Un SNP missense que mejora la enzima.",
+    "Una CNV: el número de copias del gen cambia la dosis de proteína, un ejemplo de variación genética asociada a la dieta.",
+    "Un indel que corre el marco de lectura de AMY1.",
+    "Una mutación somática adquirida por comer almidón."],
+   1,
+   _fb("CNV con efecto de dosis.", "Más copias del gen → más transcripción total → más enzima. Es un ejemplo clásico de variación estructural relacionada con la dieta.",
+       ["«SNP missense»: un SNP cambia una base; aquí lo que varía es cuántas copias del gen hay.",
+        "«Indel frameshift»: un frameshift anularía la proteína, no la aumentaría.",
+        "«Mutación somática por comer almidón»: la dieta no crea copias génicas en el individuo; la diferencia es heredada y poblacional."]))
+
+mc("B1-7 · Hiporrespondedores e hiperrespondedores",
+   "<p>En un ensayo, 30 adultos agregan 300 mg/día de colesterol dietario durante 4 semanas. El LDL cambia en promedio +6 mg/dL, pero un tercio sube más de 20 mg/dL y otro tercio no cambia. ¿Qué concepto describe mejor estos resultados?</p>",
+   ["Error de medición: todos deberían responder igual.",
+    "Respuesta interindividual a la dieta: hay hiperrespondedores e hiporrespondedores, en parte por variación genética (p. ej., APOE) y en parte por otros factores.",
+    "El promedio de +6 mg/dL describe bien a todos los participantes.",
+    "Los hiporrespondedores no absorben colesterol."],
+   1,
+   _fb("variabilidad interindividual.", "El promedio oculta subgrupos con respuestas muy distintas; la nutrigenética busca qué variantes explican parte de esa heterogeneidad.",
+       ["«Error de medición»: puede contribuir, pero una dispersión sistemática en subgrupos es justamente lo que define respondedores.",
+        "«El promedio describe a todos»: es la falacia que este concepto corrige.",
+        "«No absorben colesterol»: es una sobreinterpretación; la respuesta depende de absorción, síntesis endógena y depuración de LDL."]))
+
+mc("B1-8 · Haplotipos de TAS2R38",
+   "<p>¿Qué describe correctamente los haplotipos PAV y AVI de <em>TAS2R38</em>?</p>",
+   ["Son dos genes distintos del cromosoma 7.",
+    "Son combinaciones de tres SNPs missense (posiciones 49, 262 y 296 de la proteína); PAV forma un receptor funcional (catador de PTC/PROP, «supertaster» en el curso) y AVI uno poco funcional (no catador).",
+    "PAV es una deleción y AVI una inserción Alu.",
+    "AVI es el haplotipo catador porque tiene valina."],
+   1,
+   _fb("tres SNPs missense en un mismo haplotipo.", "Pro-Ala-Val en las posiciones 49, 262 y 296 (PAV) da un receptor sensible; Ala-Val-Ile (AVI) da un receptor con muy baja sensibilidad a tioureas como PTC y PROP.",
+       ["«Dos genes»: es un mismo gen con alelos distintos.",
+        "«Deleción/inserción»: son sustituciones de una base.",
+        "«AVI catador»: es al revés; AVI es el haplotipo no catador."]))
+
+mc("B1-9 · Receptores T2R fuera de la boca",
+   "<p>Los receptores de sabor amargo T2R también se expresan en células enteroendocrinas del intestino. ¿Qué papel fisiológico es el más aceptado?</p>",
+   ["Permiten «saborear» el alimento en el intestino de forma consciente.",
+    "Detectan compuestos amargos en la luz intestinal y estimulan la liberación de hormonas como GLP-1 o CCK, que informan al cerebro (eje intestino-cerebro) sobre saciedad y motilidad.",
+    "Degradan los compuestos amargos antes de su absorción.",
+    "Solo existen en roedores; en humanos no hay T2R extraorales."],
+   1,
+   _fb("quimiosensores que liberan hormonas intestinales.", "La señal no es una percepción consciente: activa vías endocrinas y vagales hacia el sistema nervioso central.",
+       ["«Saborear de forma consciente»: la percepción consciente del sabor ocurre en la lengua y la corteza gustativa.",
+        "«Degradan los compuestos»: los receptores detectan, no metabolizan.",
+        "«Solo roedores»: hay evidencia de T2R extraorales en humanos (intestino, vía aérea)."]))
+
+mc("B1-10 · Monogénico frente a regulatorio común",
+   "<p>¿Qué comparación entre fenilcetonuria (<em>PAH</em>) y persistencia de lactasa (<em>MCM6</em>/<em>LCT</em>) es correcta?</p>",
+   ["Ambas son rasgos poligénicos de efecto pequeño.",
+    "PKU es monogénica, recesiva, de gran efecto y con variantes casi siempre raras y codificantes; la persistencia de lactasa depende de variantes comunes en un potenciador regulatorio que cambia la expresión de LCT en el adulto.",
+    "PKU se debe a una variante del potenciador de PAH y la persistencia de lactasa a una nonsense de LCT.",
+    "En ambas la dieta no influye en el fenotipo."],
+   1,
+   _fb("gran efecto codificante frente a variante regulatoria común.", "En PKU la pérdida de función de la fenilalanina hidroxilasa es casi determinante; en lactasa, la variante cambia cuándo y cuánto se expresa una enzima normal.",
+       ["«Ambas poligénicas»: PKU es el modelo de enfermedad monogénica.",
+        "«Al revés»: invierte el tipo de variante de cada caso.",
+        "«La dieta no influye»: en ambos casos la dieta es central (restricción de Phe en PKU; consumo de lactosa en hipolactasia)."]))
+
+mc("B1-11 · ¿Dónde está la variante −13910?",
+   "<p>La variante −13910C&gt;T (rs4988235), asociada a persistencia de lactasa en europeos, se localiza en el intrón 13 del gen <em>MCM6</em>, unos 14 kb río arriba de <em>LCT</em>. ¿Cómo actúa?</p>",
+   ["Cambia un aminoácido de la proteína MCM6.",
+    "Forma parte de un potenciador: el alelo T favorece la unión de factores de transcripción (como Oct-1) y mantiene la transcripción de <em>LCT</em> en el adulto, sin cambiar la secuencia de la lactasa.",
+    "Cambia un aminoácido de la lactasa y la hace más activa.",
+    "Elimina el gen MCM6, lo que libera a LCT."],
+   1,
+   _fb("potenciador regulatorio a distancia.", "Un intrón de un gen vecino puede contener elementos que regulan a otro gen; por eso el «gen asignado» en una base de datos no siempre es el gen efector.",
+       ["«Cambia un aminoácido de MCM6»: los intrones no se traducen.",
+        "«Cambia un aminoácido de la lactasa»: la variante no está en LCT y la enzima es la misma; cambia su cantidad.",
+        "«Elimina MCM6»: es un SNP, no una deleción del gen."]))
+
+mc("B1-12 · Hipolactasia, malabsorción e intolerancia",
+   "<p>¿Cuál conjunto de definiciones es correcto?</p>",
+   ["Son sinónimos.",
+    "Hipolactasia: baja actividad de lactasa en el borde en cepillo. Malabsorción: la lactosa no se absorbe por completo (se demuestra, p. ej., con prueba de hidrógeno espirado). Intolerancia: aparición de síntomas tras ingerir lactosa.",
+    "Intolerancia es la causa genética, malabsorción el síntoma e hipolactasia la prueba de laboratorio.",
+    "Hipolactasia es una alergia a la proteína de la leche."],
+   1,
+   _fb("son tres niveles distintos: enzima, absorción y síntomas.", "Una persona puede tener hipolactasia y malabsorción sin síntomas (sin intolerancia), según la dosis de lactosa y su microbiota.",
+       ["«Sinónimos»: confundirlos lleva a diagnósticos erróneos.",
+        "«Intolerancia = causa genética»: la genética explica la hipolactasia; la intolerancia es clínica.",
+        "«Alergia a la proteína»: la alergia a proteínas de leche es inmunológica y distinta de la hipolactasia."]))
+
+mc("B1-13 · MTHFR C677T",
+   "<p>¿Qué describe correctamente la variante <em>MTHFR</em> C677T?</p>",
+   ["Es nonsense: produce una enzima truncada sin actividad.",
+    "Es missense (Ala222Val): produce una enzima termolábil con menor actividad; con folato bajo, los homocigotos TT tienden a tener homocisteína más alta.",
+    "Es sinónima y no tiene efecto.",
+    "Aumenta la actividad de MTHFR y baja la homocisteína."],
+   1,
+   _fb("missense termolábil con interacción gen–folato.", "El efecto del genotipo depende del estado de folato (y de riboflavina, precursora del FAD que usa MTHFR).",
+       ["«Nonsense»: no crea codón de paro.",
+        "«Sinónima»: cambia alanina por valina.",
+        "«Aumenta la actividad»: la reduce."]))
+
+mc("B1-14 · FTO rs9939609",
+   "<p>¿Qué afirmación sobre el alelo A de <em>FTO</em> rs9939609 está mejor sustentada?</p>",
+   ["Cada copia del alelo A se asocia con más masa grasa y mayor riesgo de obesidad, con un efecto modesto (del orden de 1–1.5 kg por alelo) que se atenúa en personas físicamente activas.",
+    "Los homocigotos AA desarrollan obesidad con certeza.",
+    "Es una variante nonsense que elimina la proteína FTO.",
+    "Explica la mayor parte de la variación del IMC en la población."],
    0,
-   "<p><strong>Correcta: A nutrigenómica, B nutrigenética.</strong> La pregunta clave es en qué dirección va la flecha: "
-   "nutriente → expresión génica (nutrigenómica) o genotipo → respuesta al nutriente (nutrigenética). "
-   "El número de genes medidos no define la disciplina, y que haya variación entre voluntarios no convierte un estudio en nutrigenético si el genotipo no es la variable de estudio.</p>")
+   _fb("asociación real pero de efecto pequeño.", "Es la variante común de mayor efecto descrita para IMC, pero explica una fracción mínima de la varianza y su efecto se modifica con la actividad física.",
+       ["«Obesidad con certeza»: es un factor de riesgo probabilístico.",
+        "«Nonsense»: está en un intrón y actúa por mecanismos regulatorios.",
+        "«La mayor parte de la variación»: el IMC es poligénico y muy influido por el ambiente."]))
 
-mc("I-2 · Primer-BLAST sin producto",
-   "<p>Un equipo quiere verificar la especificidad de unos primers que amplifican un polimorfismo de inserción Alu situado en un "
-   "<strong>intrón</strong> del gen <em>LPL</em>. Corren Primer-BLAST con la base de datos por defecto (<em>Refseq mRNA</em>) "
-   "y el resultado es «No target templates were found». ¿Qué concluyes?</p>",
-   ["Los primers están mal diseñados y deben rediseñarse antes de seguir.",
-    "El resultado era esperable: la base de mRNA no contiene intrones; hay que repetir con <em>Refseq representative genomes</em> de <em>Homo sapiens</em>.",
-    "El Alu no existe en humanos modernos, por eso no aparece en ninguna base.",
-    "Los primers solo funcionarán con cDNA, así que hay que hacer RT-PCR."],
+mc("B1-15 · ALDH2 y acetaldehído",
+   "<p>¿Por qué los portadores del alelo <em>ALDH2</em>*2 (rs671, Glu504Lys) presentan rubor facial tras beber alcohol?</p>",
+   ["Porque metabolizan el etanol más lento y se acumula etanol.",
+    "Porque la enzima ALDH2 mutante, que actúa como tetrámero, pierde actividad (efecto dominante negativo); el acetaldehído se acumula y causa vasodilatación.",
+    "Porque tienen alergia al alcohol.",
+    "Porque producen más ALDH2 y oxidan el acetaldehído demasiado rápido."],
    1,
-   "<p><strong>Correcta: la base de mRNA no tiene intrones.</strong> Un mRNA maduro ya perdió los intrones por splicing, así que un amplicón "
-   "intrónico no puede encontrarse ahí. Antes de culpar al diseño hay que preguntarse si la base de datos contiene la secuencia buscada. "
-   "Hacer RT-PCR sería justo lo contrario: el cDNA tampoco tiene intrones.</p>")
-
-mc("I-3 · Lectura de un gel PCR-RFLP (MTHFR C677T)",
-   "<p>El polimorfismo <em>MTHFR</em> C677T se genotipa amplificando un fragmento de 198 pb y digiriéndolo con <em>Hin</em>fI. "
-   "El alelo T crea un sitio de corte, de modo que el fragmento T se corta en 175 + 23 pb; el alelo C queda sin cortar.</p>"
-   "<p>En un gel de agarosa al 3 % un carril muestra bandas de <strong>198 pb y 175 pb</strong> y no se ve banda de 23 pb. ¿Cuál es el genotipo más probable?</p>",
-   ["CC, porque la banda de 23 pb no aparece y por lo tanto no hubo corte.",
-    "TT, porque la banda de 175 pb indica que hubo corte.",
-    "CT: hay producto sin cortar (C) y producto cortado (T); la banda de 23 pb es demasiado pequeña y tenue para verse en agarosa.",
-    "No se puede asignar genotipo: la ausencia de la banda de 23 pb invalida la digestión."],
-   2,
-   "<p><strong>Correcta: CT.</strong> El heterocigoto da las bandas de ambos alelos: 198 (C, sin cortar) y 175 + 23 (T). "
-   "Un fragmento de 23 pb casi no se tiñe y suele correr fuera del intervalo útil del gel, así que su ausencia no prueba que no hubo corte. "
-   "Si fuera TT faltaría la banda de 198 pb (salvo digestión incompleta, que se controla con una muestra de genotipo conocido).</p>")
-
-mc("I-4 · Un heterocigoto que se lee como homocigoto",
-   "<p>En el polimorfismo ACE I/D, el alelo D da ~190 pb y el alelo I ~490 pb. Un grupo genotipa 60 personas y reporta 0 heterocigotos I/D, "
-   "aunque en esa población se esperaban cerca de la mitad. ¿Cuál es la explicación técnica más probable y su solución?</p>",
-   ["El alelo I es letal en heterocigosis; el resultado es biológicamente correcto.",
-    "La banda D, más corta, se amplifica preferentemente y algunos I/D se leen como D/D; se confirma con un segundo par de primers específicos de la inserción.",
-    "La enzima de restricción no cortó; hay que digerir con otra enzima.",
-    "El gel tenía demasiada agarosa; con un gel al 0.5 % aparecerían los heterocigotos."],
-   1,
-   "<p><strong>Correcta: amplificación preferencial del alelo corto.</strong> En la PCR, el fragmento corto compite con ventaja y puede ocultar al largo. "
-   "Por eso en investigación los D/D se confirman con un primer que solo hibrida dentro de la inserción. "
-   "ACE I/D no usa enzima de restricción (se distingue por tamaño), y un gel muy diluido empeoraría la resolución.</p>")
-
-mc("I-5 · Hardy–Weinberg como control de calidad",
-   "<p>En 200 estudiantes se genotipó un SNP: 98 AA, 22 AG y 80 GG. La frecuencia de A es 0.545. "
-   "Bajo equilibrio de Hardy–Weinberg se esperarían ~99 heterocigotos, y se observaron 22. ¿Qué interpretación es más sólida?</p>",
-   ["La población está en equilibrio, porque las frecuencias alélicas suman 1.",
-    "El déficit tan grande de heterocigotos sugiere un problema de genotipado (pérdida de un alelo, mala lectura del gel) o una muestra mezclada de poblaciones; hay que revisarlo antes de interpretar.",
-    "El alelo G confiere una ventaja selectiva que se manifestó en una generación.",
-    "Es esperable: los heterocigotos siempre son minoría en cualquier población."],
-   1,
-   "<p><strong>Correcta: revisar el genotipado o la estructura de la muestra.</strong> Que p + q = 1 es cierto por definición, no prueba equilibrio. "
-   "Un exceso de homocigotos tan marcado rara vez es biológico en una muestra de estudiantes: suele indicar error técnico (como en ACE I/D) o mezcla de subpoblaciones (efecto Wahlund). "
-   "Con p ≈ 0.5, los heterocigotos esperados son la clase más frecuente, no la minoría.</p>")
-
-mc("I-6 · La trampa de la hebra",
-   "<p>Un gen de receptor del gusto está en la hebra (−) del cromosoma. El alelo funcional, en la secuencia codificante, es <strong>C</strong>. "
-   "Ensembl reporta los alelos sobre la hebra (+): G = 0.71 y C = 0.29 en la población MXL. Un alumno escribe que el alelo funcional tiene frecuencia 0.29 en MXL. ¿Qué pasó?</p>",
-   ["Nada; Ensembl siempre reporta la hebra codificante.",
-    "Confundió la hebra: la C codificante corresponde a la G de la hebra (+), así que la frecuencia del alelo funcional es 0.71.",
-    "La frecuencia correcta es 0.50, porque en un SNP bialélico cada alelo vale la mitad.",
-    "Debe sumar ambas frecuencias porque el gen está en las dos hebras."],
-   1,
-   "<p><strong>Correcta: complementar la base.</strong> En un gen de la hebra (−), la base codificante es el complemento de la que se lee en la hebra (+): C ↔ G. "
-   "Es la misma trampa que vimos con TAS2R38: confundir la hebra invierte la frecuencia reportada.</p>")
-
-# ---- Unidad II: estrés oxidativo y antioxidantes ---------------------------
-
-mc("II-1 · Curva que no llega al 50 %",
-   "<p>Un extracto de cáscara de mango alcanza solo <strong>38 % de inhibición</strong> de DPPH a la concentración máxima probada (200 µg/mL). "
-   "Un alumno ajusta una recta y extrapola una IC<sub>50</sub> de 290 µg/mL. ¿Qué es lo correcto?</p>",
-   ["Reportar IC<sub>50</sub> = 290 µg/mL, porque la recta tiene buen R².",
-    "No extrapolar: reportar «IC<sub>50</sub> > 200 µg/mL» junto con el 38 % a 200 µg/mL, o repetir con concentraciones mayores.",
-    "Reportar IC<sub>50</sub> = 200 µg/mL, porque es la máxima concentración probada.",
-    "Concluir que el extracto no tiene actividad antioxidante."],
-   1,
-   "<p><strong>Correcta: no extrapolar.</strong> La relación dosis–respuesta no es lineal y suele aplanarse; una recta fuera del intervalo medido inventa un dato. "
-   "Un 38 % sí es actividad, solo que menor que la necesaria para estimar la IC<sub>50</sub> con los datos disponibles.</p>")
-
-mc("II-2 · Inhibición negativa con jamaica",
-   "<p>Con un extracto concentrado de jamaica, la absorbancia a 517 nm de «muestra + DPPH» resulta <strong>mayor</strong> que la del control, "
-   "y el cálculo da −12 % de inhibición. ¿Cuál es la causa más probable?</p>",
-   ["La jamaica es prooxidante y genera más radical DPPH•.",
-    "Las antocianinas absorben cerca de 520 nm y suman su color a la lectura; falta restar un blanco de muestra (extracto sin DPPH).",
-    "El DPPH se degradó por la luz.",
-    "El espectrofotómetro se calibró a una longitud de onda equivocada."],
-   1,
-   "<p><strong>Correcta: interferencia de color.</strong> Los pigmentos rojos absorben en la misma región que el DPPH•. "
-   "El blanco de muestra corrige esa absorbancia propia. Un DPPH degradado haría <em>bajar</em> el control, no subir la muestra; y el DPPH• no se «genera» a partir del extracto.</p>")
-
-mc("II-3 · Dos ensayos, dos rankings",
-   "<p>El extracto A tiene mejor IC<sub>50</sub> en DPPH; el extracto B da más µmol TE/g en FRAP. ¿Cuál afirmación es la más defendible?</p>",
-   ["A es mejor antioxidante, porque DPPH usa un radical y FRAP no.",
-    "B es mejor antioxidante, porque FRAP es más reproducible.",
-    "Ninguno es «mejor» en absoluto: los ensayos difieren en mecanismo (HAT/SET), disolvente, pH y tiempo, y favorecen compuestos distintos; por eso se reportan al menos dos ensayos.",
-    "Los resultados son contradictorios, así que al menos uno de los ensayos está mal hecho."],
-   2,
-   "<p><strong>Correcta: ningún ensayo mide «la» capacidad antioxidante.</strong> FRAP trabaja a pH 3.6 y solo mide transferencia de electrón; DPPH es mixto y en metanol. "
-   "Rankings distintos son esperables y no indican error.</p>")
-
-mc("II-4 · Lo que FRAP no ve",
-   "<p>Una bebida rica en glutatión (un tiol) da un valor de FRAP mucho menor de lo que su contenido de tioles haría esperar. ¿Por qué?</p>",
-   ["El glutatión no es antioxidante.",
-    "FRAP detecta mal los tioles y trabaja a pH ácido (3.6), lejos del fisiológico; un ensayo como ABTS o CUPRAC lo reflejaría mejor.",
-    "El glutatión aumenta la absorbancia a 593 nm y anula la señal.",
-    "FRAP solo mide antioxidantes liposolubles."],
-   1,
-   "<p><strong>Correcta: selectividad del ensayo.</strong> FRAP responde a cualquier reductor capaz de reducir Fe³⁺-TPTZ en esas condiciones, pero reacciona poco con tioles. "
-   "Esto ilustra por qué un solo ensayo puede subestimar a ciertos compuestos.</p>")
-
-mc("II-5 · Más SOD no siempre es mejor",
-   "<p>Un ratón transgénico sobreexpresa SOD1 cinco veces, sin cambios en catalasa ni glutatión peroxidasa. "
-   "Tras un reto oxidativo muestra <strong>más</strong> daño lipídico que el silvestre. ¿Cuál es la explicación más coherente?</p>",
-   ["La SOD1 en exceso consume el H₂O₂ y deja sin sustrato a la catalasa.",
-    "La SOD convierte el superóxido en H₂O₂ más rápido de lo que este se elimina; el H₂O₂ acumulado, con Fe²⁺, genera radical hidroxilo (Fenton).",
-    "La SOD1 es prooxidante por sí misma porque contiene cobre.",
-    "El transgén silenció a la catalasa por metilación."],
-   1,
-   "<p><strong>Correcta: desbalance entre los dos pasos de la cascada.</strong> O₂•⁻ → (SOD) → H₂O₂ → (catalasa/GPx) → H₂O. "
-   "Acelerar solo el primer paso cambia una especie reactiva por otra; el •OH de Fenton es el más dañino. "
-   "No hay datos que apoyen un silenciamiento epigenético.</p>")
-
-mc("II-6 · SOD fuera de intervalo",
-   "<p>En el ensayo de SOD con NBT, un homogenado de hígado sin diluir da <strong>96 % de inhibición</strong>. ¿Qué haces?</p>",
-   ["Reportar 96 % como actividad máxima.",
-    "Calcular las unidades directamente: si 50 % = 1 U, entonces 96 % ≈ 1.92 U.",
-    "Diluir el homogenado y repetir hasta quedar entre 20 y 80 % de inhibición, y obtener el volumen que da 50 % a partir de la curva.",
-    "Aumentar la concentración de NBT para que vuelva a aparecer el color."],
-   2,
-   "<p><strong>Correcta: diluir.</strong> La relación entre inhibición y cantidad de enzima no es lineal y se satura cerca del 100 %; "
-   "ahí la inhibición ya no distingue entre mucha y muchísima enzima. Por eso no se escala proporcionalmente. "
-   "Cambiar el NBT altera la competencia por el superóxido y la definición de la unidad.</p>")
-
-mc("II-7 · Catalasa que se aplana",
-   "<p>Al medir catalasa (caída de A<sub>240</sub>), la absorbancia baja casi a cero en los primeros 10 s y luego se queda plana. ¿Qué indica y cómo se corrige?</p>",
-   ["La enzima está inactiva; hay que preparar un homogenado nuevo.",
-    "Hay demasiada enzima; diluir el homogenado y usar solo el tramo inicial (cinética de primer orden).",
-    "El H₂O₂ estaba contaminado con plástico; cambiar a cubeta de vidrio común.",
-    "Es el comportamiento normal; reportar el ΔA total entre 0 y 60 s."],
-   1,
-   "<p><strong>Correcta: demasiada enzima.</strong> La catalasa casi no se satura y agota rápidamente el H₂O₂; si el sustrato se acaba, la pendiente deja de reflejar la actividad. "
-   "El vidrio común absorbe en el UV: se necesita cuarzo o cubeta UV.</p>")
-
-mc("II-8 · TAC sérica que sube por otra razón",
-   "<p>Tras 8 semanas tomando un jugo de frutas con fructosa añadida, la capacidad antioxidante total (TAC) del suero sube 25 %. "
-   "También subió el ácido úrico sérico. ¿Qué conclusión es más prudente?</p>",
-   ["El jugo mejoró el estado antioxidante, porque la TAC subió.",
-    "No se puede atribuir el aumento de TAC a los antioxidantes del jugo: el ácido úrico aporta buena parte de la TAC plasmática y la fructosa lo eleva; hay que medir enzimas y un marcador de daño.",
-    "La TAC sérica no tiene relación con el ácido úrico.",
-    "El aumento de ácido úrico demuestra que el jugo es prooxidante."],
-   1,
-   "<p><strong>Correcta: confusor metabólico.</strong> El urato es uno de los principales contribuyentes a la TAC del plasma, y el metabolismo hepático de la fructosa lo incrementa. "
-   "Un aumento de TAC no equivale a menos estrés oxidativo; se confirma con enzimas (SOD, catalasa) y daño (MDA/TBARS).</p>")
-
-mc("II-9 · Polifenoles: tubo frente a organismo",
-   "<p>La quercetina tiene una IC<sub>50</sub> excelente en DPPH, pero su concentración plasmática tras una comida rara vez supera el rango micromolar bajo "
-   "y circula mayoritariamente conjugada. Aun así, algunos estudios reportan más expresión de enzimas antioxidantes en tejido. ¿Qué mecanismo reconcilia ambas observaciones?</p>",
-   ["Neutralización directa de radicales en el plasma, porque basta una concentración baja.",
-    "Activación de Nrf2: los polifenoles o sus metabolitos modifican a Keap1, Nrf2 se acumula y aumenta la transcripción de enzimas antioxidantes; el efecto depende de la señalización, no de la estequiometría.",
-    "Los polifenoles se convierten en SOD dentro del hígado.",
-    "La quercetina inhibe la catalasa y así aumenta la señal de H₂O₂."],
-   1,
-   "<p><strong>Correcta: señalización vía Nrf2.</strong> Una molécula a concentración baja no puede neutralizar estequiométricamente un flujo continuo de radicales, pero sí puede activar un factor de transcripción "
-   "que amplifica la respuesta. Esta es la razón por la que medimos los dos lados: la actividad química del extracto y las enzimas del organismo.</p>")
-
-# ---- Unidad III: epigenética y nutrición ----------------------------------
-
-mc("III-1 · El diseño de la Hambruna Holandesa",
-   "<p>En el estudio de la Hambruna Holandesa (1944–45), cada persona expuesta se comparó con un hermano o hermana <strong>del mismo sexo</strong> no expuesto. ¿Qué gana el diseño con esa elección?</p>",
-   ["Elimina por completo cualquier confusión.",
-    "Controla parcialmente el fondo genético y el ambiente familiar compartido, y el sexo, que también influyen en la metilación; así la diferencia es más atribuible a la exposición prenatal.",
-    "Permite estudiar herencia transgeneracional.",
-    "Asegura que ambos hermanos tengan exactamente el mismo genotipo."],
-   1,
-   "<p><strong>Correcta: control parcial de genética, familia y sexo.</strong> Los hermanos comparten en promedio la mitad de las variantes (no todo el genotipo) y gran parte del ambiente familiar. "
-   "Recordemos que hay variantes (mQTL) que cambian la metilación cercana, así que controlar la genética importa. Ningún diseño observacional elimina toda la confusión.</p>")
-
-mc("III-2 · ¿Por qué IGF2?",
-   "<p>¿Por qué un gen impreso como <em>IGF2</em> es un buen candidato para registrar exposiciones periconcepcionales?</p>",
-   ["Porque solo se expresa en el adulto mayor.",
-    "Porque su marca de metilación resiste la ola de desmetilación del embrión preimplantación y se establece en una ventana muy temprana, así que una perturbación en ese momento puede dejar huella duradera.",
-    "Porque su secuencia cambia con la dieta materna.",
-    "Porque todos los genes impresos se expresan desde los dos alelos."],
-   1,
-   "<p><strong>Correcta: resiste la reprogramación.</strong> Las improntas se colocan en los gametos y se mantienen tras la fecundación; por eso registran exposiciones muy tempranas. "
-   "En los genes impresos solo se expresa el alelo de un progenitor (IGF2: paterno), y la dieta no cambia la secuencia.</p>")
-
-mc("III-3 · Ratón agouti",
-   "<p>Dos crías de la misma camada tienen genotipo <em>A<sup>vy</sup>/a</em>; una es amarilla y obesa, otra café y delgada. "
-   "¿Por qué esto se considera evidencia epigenética y no genética?</p>",
-   ["Porque tienen distinto número de copias del gen agouti.",
-    "Porque comparten genotipo pero difieren en la metilación del retrotransposón IAP río arriba de agouti, que determina si el gen se expresa de forma ectópica.",
-    "Porque una heredó el alelo de la madre y la otra del padre.",
-    "Porque la dieta materna mutó el IAP en una de ellas."],
-   1,
-   "<p><strong>Correcta: mismo genotipo, distinta metilación.</strong> IAP hipometilado → agouti ectópico → amarillo y obeso; IAP metilado → café (pseudoagouti). "
-   "Los donadores de metilo en la dieta materna desplazan la distribución hacia el café; el bisfenol A la desplaza hacia el amarillo.</p>")
-
-mc("III-4 · Potencial de metilación",
-   "<p>Ratas alimentadas sin folato ni colina muestran hipometilación global del DNA hepático. ¿Cuál es el mecanismo más directo?</p>",
-   ["El folato se incorpora como base en el DNA y al faltar se pierde la metilación.",
-    "Cae la remetilación de homocisteína: baja el SAM y sube el SAH; el SAH inhibe a las DNMT, así que el cociente SAM/SAH (potencial de metilación) disminuye.",
-    "La colina se une a las colas de histonas y sin ella el DNA se desenrolla.",
-    "La falta de folato activa a las enzimas TET, que eliminan todos los metilos."],
-   1,
-   "<p><strong>Correcta: SAM ↓, SAH ↑.</strong> El folato (vía 5-metil-THF y metionina sintasa) y la colina (vía betaína y BHMT) remetilan la homocisteína. "
-   "El SAH no es inerte: inhibe a las metiltransferasas, por eso importa el cociente y no solo el SAM.</p>")
-
-mc("III-5 · Dos tejidos en Gambia",
-   "<p>En el estudio de Gambia, la metilación de epialelos metaestables se midió en sangre y en folículo piloso de los bebés. "
-   "¿Por qué medir dos tejidos fortalece la conclusión?</p>",
-   ["Porque así se duplica el tamaño de muestra.",
-    "Porque provienen de capas embrionarias distintas (mesodermo y ectodermo): si ambos cambian igual, la marca se estableció antes de la diferenciación, en el embrión temprano, y es sistémica.",
-    "Porque el folículo piloso no tiene DNA metilado y sirve de control negativo.",
-    "Porque la sangre refleja la dieta del bebé y el pelo la de la madre."],
-   1,
-   "<p><strong>Correcta: origen embrionario distinto.</strong> Una marca presente en tejidos de linajes diferentes apunta a un evento previo a la gastrulación, "
-   "lo que coincide con la ventana periconcepcional en que cambió la dieta materna.</p>")
-
-mc("III-6 · Gemelos que divergen",
-   "<p>Los gemelos monocigóticos mayores difieren más en metilación que los jóvenes. ¿Qué diseño distinguiría mejor entre el efecto del estilo de vida y el azar (deriva epigenética)?</p>",
-   ["Comparar un solo par de gemelos de 50 años.",
-    "Seguir a muchos pares en el tiempo y relacionar cuánto difieren en hábitos (dieta, tabaco, ejercicio) con cuánto difieren en metilación: si la divergencia es igual con o sin diferencias de hábitos, predomina el azar.",
-    "Secuenciar el genoma de ambos gemelos para encontrar mutaciones.",
-    "Medir la metilación solo en recién nacidos."],
-   1,
-   "<p><strong>Correcta: diseño longitudinal con exposición medida.</strong> Hay tres fuentes de variación: genética (mQTL), ambiental y estocástica. "
-   "En gemelos MZ la genética está controlada; para separar ambiente y azar hay que medir las diferencias de exposición y ver si predicen la divergencia.</p>")
-
-mc("III-7 · Una diferencia que podría ser genética",
-   "<p>Un estudio transversal encuentra que los vegetarianos tienen 8 % menos metilación en un CpG que los omnívoros, y concluye que la dieta vegetariana desmetila ese sitio. "
-   "Ese CpG está a 300 pb de un SNP común, y el estudio no genotipó a los participantes. ¿Cuál es la crítica más importante?</p>",
-   ["El efecto es muy pequeño para ser real.",
-    "El SNP podría ser un mQTL: si su frecuencia difiere entre los grupos (por ascendencia, por ejemplo), explicaría la diferencia sin que la dieta intervenga.",
-    "La metilación no se puede medir en un solo CpG.",
-    "Los vegetarianos consumen más folato, así que deberían tener más metilación, no menos."],
-   1,
-   "<p><strong>Correcta: posible confusión genética.</strong> No toda diferencia de metilación es dietaria; un estudio serio considera el genotipo. "
-   "Además, al ser transversal, no establece temporalidad. La opción D asume un mecanismo sin datos que lo respalden.</p>")
-
-mc("III-8 · Metionina y H3K4me3",
-   "<p>Restringir metionina bajó el SAM y la marca H3K4me3 en pocas horas, y la marca se recuperó al restaurar la metionina. ¿Qué implica esa reversibilidad?</p>",
-   ["Que las marcas de histonas son irrelevantes para la expresión génica.",
-    "Que algunas marcas responden de forma dinámica al estado nutricional del adulto, porque las metiltransferasas dependen del SAM disponible; no todo efecto epigenético es una huella permanente del desarrollo.",
-    "Que la metionina modifica la secuencia del DNA de forma reversible.",
-    "Que H3K4me3 es una marca de represión."],
-   1,
-   "<p><strong>Correcta: el metabolismo alimenta la cromatina en tiempo real.</strong> Las HAT usan acetil-CoA y las metiltransferasas usan SAM. "
-   "H3K4me3 marca promotores activos (las de represión son H3K9me3 y H3K27me3).</p>")
-
-mc("III-9 · Anti-miR-33",
-   "<p><em>miR-33a</em> está en un intrón de <em>SREBF2</em> y reprime a <em>ABCA1</em>. Si en ratones se administra un oligonucleótido que inhibe a miR-33, ¿qué se espera?</p>",
-   ["Menos ABCA1 y menos HDL.",
-    "Más ABCA1, más eflujo de colesterol y más HDL plasmático.",
-    "Menos síntesis de colesterol, porque se inhibe a SREBF2.",
-    "Ningún cambio, porque los miRNAs no regulan genes de lípidos."],
-   1,
-   "<p><strong>Correcta: se libera la represión de ABCA1.</strong> Inhibir el miRNA no apaga a su gen hospedero; solo deja de reprimir sus blancos. "
-   "Más ABCA1 → más eflujo de colesterol hacia apoA-I → más HDL, como se observó en ratones.</p>")
-
-mc("III-10 · miRNAs de la dieta",
-   "<p>Un estudio reportó un miRNA del arroz en suero humano que reprimía un gen hepático en ratón; un estudio posterior, con controles más estrictos, "
-   "no detectó miRNAs vegetales en plasma de humanos, ratones ni abejas tras la ingesta. ¿Cuál es la postura más rigurosa?</p>",
-   ["Aceptar el primer estudio porque se publicó antes.",
-    "Aceptar el segundo porque tiene más especies.",
-    "Considerar la hipótesis no establecida: hay que comparar sensibilidad del método, controles de contaminación y reproducibilidad independiente antes de aceptarla.",
-    "Concluir que los miRNAs no existen en plantas."],
-   2,
-   "<p><strong>Correcta: hipótesis abierta.</strong> En ciencia una afirmación extraordinaria necesita replicación independiente. "
-   "Las secuencias contaminantes de reactivos y la amplificación de cantidades mínimas son fuentes conocidas de falsos positivos en este tipo de estudios.</p>")
+   _fb("acumulación de acetaldehído por pérdida de función dominante negativa.", "Basta una copia de ALDH2*2 para reducir mucho la actividad, porque las subunidades mutantes contaminan el tetrámero.",
+       ["«Se acumula etanol»: el paso afectado es acetaldehído → acetato, después de ADH.",
+        "«Alergia»: no es un mecanismo inmunológico.",
+        "«Más ALDH2»: es al revés; la actividad baja."]))
 
 # ===========================================================================
-# SECCIÓN II · SELECCIÓN MÚLTIPLE
+# BLOQUE 2 · CASOS CLÍNICOS Y DIAGNÓSTICO NUTRIGENÉTICO (30 pts)
 # ===========================================================================
-header("<h3>Sección II · Selección múltiple</h3>"
-       "<p>6 reactivos, 2 puntos cada uno. Marca <strong>todas</strong> las opciones correctas; Canvas da crédito parcial y descuenta las marcadas de más.</p>")
+header("<h3>Bloque 2 · Casos clínicos y diagnóstico nutrigenético (30 %)</h3>"
+       "<p>6 casos de opción múltiple (2 pts c/u), 2 de selección múltiple (3 pts c/u) y 2 casos de respuesta extendida (6 pts c/u).</p>")
 
-ma("SM-1 · Leer el patrón enzimático",
-   "<p>Ratas con dieta alta en fructosa + extracto vegetal, comparadas con el grupo que solo recibió fructosa:</p>"
-   + _tabla(["Marcador hepático", "Cambio"],
-            [("SOD (U/mg proteína)", "↑ 60 %"), ("Catalasa (U/mg proteína)", "sin cambio"), ("TBARS (nmol MDA/mg)", "↑ 35 %")])
-   + "<p>Selecciona las afirmaciones bien sustentadas.</p>",
-   ["Puede estar acumulándose H₂O₂, porque se produce más de lo que la catalasa elimina.",
-    "El aumento de TBARS es coherente con más peroxidación lipídica, posiblemente por Fenton.",
-    "El extracto demostró ser antioxidante <em>in vivo</em>, porque elevó la SOD.",
-    "Antes de concluir convendría medir glutatión peroxidasa o glutatión, la otra vía de eliminación del H₂O₂.",
-    "Más SOD siempre indica mejor estado redox."],
-   [0, 1, 3],
-   "<p><strong>Correctas: 1, 2 y 4.</strong> SOD alta con catalasa igual y más daño lipídico es el patrón de desbalance, no de protección. "
-   "Una enzima elevada puede ser señal de más estrés, no de mejor salud. La GPx también elimina H₂O₂ y no se midió.</p>")
+mc("B2-1 · Niño que rechaza el brócoli",
+   "<p>Un niño de 8 años con genotipo <em>TAS2R38</em> PAV/PAV rechaza brócoli, col y coles de Bruselas. Su madre pide un «suplemento para que le guste». ¿Qué recomendación es la mejor fundamentada?</p>",
+   ["No hay nada que hacer: su genotipo le impedirá comer crucíferas toda la vida.",
+    "Explicar que percibe más intenso el amargor de los glucosinolatos; usar exposición repetida, cocciones que reducen el amargor y combinaciones con grasas o sabores dulces/salados, y asegurar otras fuentes de verduras.",
+    "Indicar un suplemento de PROP para desensibilizar el receptor.",
+    "Cambiar el diagnóstico a alergia alimentaria."],
+   1,
+   _fb("intervención conductual y culinaria informada por el genotipo.", "El genotipo explica una mayor sensibilidad, no una imposibilidad; la aceptación de alimentos se modifica con exposición y preparación.",
+       ["«No hay nada que hacer»: el genotipo es un factor, no un destino.",
+        "«Suplemento de PROP»: no existe evidencia de desensibilización así, y PROP es un compuesto de prueba.",
+        "«Alergia»: rechazo por sabor no es una reacción inmunológica."]))
 
-ma("SM-2 · De la IC<sub>50</sub> a la recomendación",
-   "<p>Un extracto de semilla de aguacate tiene IC<sub>50</sub> = 12 µg/mL en DPPH, más baja que la del ácido ascórbico en el mismo ensayo. "
-   "Una empresa quiere anunciar que «protege tus células mejor que la vitamina C». ¿Qué objeciones son válidas?</p>",
-   ["DPPH es un radical nitrogenado artificial; no representa a las especies reactivas fisiológicas.",
-    "El ensayo no considera absorción, metabolismo ni concentración alcanzada en el tejido.",
-    "Una IC<sub>50</sub> baja indica menor actividad que la vitamina C.",
-    "Haría falta evidencia en un modelo biológico (enzimas, marcadores de daño) y, para la afirmación en humanos, estudios en humanos.",
-    "Basta con repetir el DPPH por triplicado para sostener la afirmación."],
-   [0, 1, 3],
-   "<p><strong>Correctas: 1, 2 y 4.</strong> La IC<sub>50</sub> baja sí indica mayor actividad <em>en el tubo</em> (la opción 3 es falsa). "
-   "El problema es extrapolar del tubo a la célula; la replicación técnica no resuelve un problema de validez.</p>")
+mc("B2-2 · «El cilantro sabe a jabón»",
+   "<p>Una paciente dice que el cilantro le sabe a jabón y lo evita en todas las salsas. Su prueba genética muestra el alelo de riesgo en una variante cercana a <em>OR6A2</em>. ¿Qué interpretación es la mejor?</p>",
+   ["Tiene una enfermedad del gusto que requiere tratamiento.",
+    "OR6A2 codifica un receptor olfatorio que detecta aldehídos presentes en el cilantro; su variante se asocia a percibir ese olor como «jabonoso». Es una variación normal; basta sustituir el cilantro por otras hierbas sin consecuencias nutricionales relevantes.",
+    "Debe forzarse a comer cilantro porque su genotipo es un error.",
+    "El sabor a jabón se debe a que el cilantro contiene detergente."],
+   1,
+   _fb("variación normal de un receptor olfatorio.", "La percepción del sabor de las hierbas depende mucho del olfato; el cilantro contiene aldehídos con notas jabonosas que algunas personas perciben con más intensidad.",
+       ["«Enfermedad»: es variación común, no patología.",
+        "«Forzarlo»: no hay beneficio nutricional que lo justifique.",
+        "«Contiene detergente»: son aldehídos naturales de la planta."]))
 
-ma("SM-3 · Gen × nutriente",
-   "<p>En un estudio, las personas <em>MTHFR</em> 677TT tuvieron menos metilación genómica que las CC, pero la diferencia se concentró en las TT con folato bajo. "
-   "¿Qué afirmaciones se desprenden?</p>",
-   ["Es una interacción gen–nutriente: el efecto del genotipo depende del estado de folato.",
-    "Las personas TT con buen estado de folato pueden tener una metilación similar a la de las CC.",
-    "El genotipo TT causa hipometilación en cualquier condición dietaria.",
-    "Una recomendación razonable es asegurar un buen aporte de folato (y de riboflavina, cofactor de MTHFR) en personas TT.",
-    "Las personas CC no necesitan folato."],
-   [0, 1, 3],
-   "<p><strong>Correctas: 1, 2 y 4.</strong> La interacción implica que el genotipo no es destino; la dieta modula su efecto. "
-   "MTHFR usa FAD (derivado de la riboflavina). El folato es esencial para todos, no solo para TT.</p>")
+mc("B2-3 · Orina después de espárragos",
+   "<p>Dos hermanos comen espárragos. Uno nota un olor sulfuroso en su orina y el otro asegura que no huele nada. ¿Qué explicación es más completa?</p>",
+   ["El hermano que no huele nada no produce los compuestos azufrados.",
+    "Hay variación en dos pasos: producir los compuestos azufrados y percibirlos. Una variante cercana a <em>OR2M7</em> se asocia a anosmia específica para ese olor; para saber cuál paso falla, habría que pedirle que huela la orina del hermano.",
+    "Ambos deberían tener el mismo fenotipo porque son hermanos.",
+    "Es un signo de insuficiencia renal."],
+   1,
+   _fb("distinguir producción de percepción.", "Es una buena lección de diseño: una sola observación («no huelo nada») tiene dos explicaciones posibles, y un experimento simple las separa.",
+       ["«No produce»: posible, pero no es la única explicación; podría producirlos y no percibirlos.",
+        "«Mismo fenotipo por ser hermanos»: comparten en promedio la mitad de las variantes.",
+        "«Insuficiencia renal»: es un fenómeno común y benigno."]))
 
-ma("SM-4 · ¿Transgeneracional o intergeneracional?",
-   "<p>¿Cuáles escenarios cumplirían el criterio de herencia <strong>transgeneracional</strong> verdadera?</p>",
-   ["Una gestante (F0) se expone a hambruna y su hijo (F1) tiene diabetes a los 50 años.",
-    "Una gestante (F0) se expone y el efecto aparece en sus bisnietos (F3), que nunca estuvieron expuestos.",
-    "Una gestante (F0) se expone y el efecto aparece en sus nietos (F2).",
-    "Un macho (F0) se expone antes de la concepción y el efecto aparece en sus nietos (F2).",
-    "Una madre lactante cambia su dieta y su bebé tiene otra microbiota."],
-   [1, 3],
-   "<p><strong>Correctas: 2 y 4.</strong> Si la gestante se expone, también se exponen el feto (F1) y sus células germinales (F2). "
-   "Solo la F3 por vía materna, o la F2 por vía paterna, no tuvieron exposición directa. La lactancia es una exposición directa del bebé.</p>")
+mc("B2-4 · Café y metabolismo lento",
+   "<p>Hombre de 42 años, presión arterial limítrofe, toma 4 tazas de café al día. Su genotipo <em>CYP1A2</em> rs762551 es C/C («metabolizador lento»). ¿Qué recomendación es más coherente con la evidencia?</p>",
+   ["Ninguna: el café es igual para todos.",
+    "Considerar reducir a 1–2 tazas/día: en metabolizadores lentos la cafeína permanece más tiempo en circulación, y se ha descrito mayor riesgo cardiovascular con consumo alto en ese genotipo; vigilar presión arterial.",
+    "Aumentar el café porque los metabolizadores lentos se benefician más de la cafeína.",
+    "Suspender toda fuente de cafeína de inmediato porque su genotipo es patogénico."],
+   1,
+   _fb("moderar la dosis según el metabolismo.", "CYP1A2 hace la mayor parte del metabolismo de la cafeína; la variante condiciona cuánto tiempo está expuesto el organismo a la misma dosis.",
+       ["«Igual para todos»: ignora la variabilidad farmacocinética documentada.",
+        "«Aumentar el café»: el beneficio descrito con café se observa sobre todo en metabolizadores rápidos.",
+        "«Suspender de inmediato, genotipo patogénico»: es una variante común, no una enfermedad; la recomendación es de moderación."]))
 
-ma("SM-5 · PCR in silico de una inserción Alu",
-   "<p>Para un polimorfismo de inserción Alu, UCSC In-Silico PCR sobre GRCh38 devuelve un producto de 352 pb que cae en un intrón. "
-   "El genoma de referencia no tiene la inserción, y el Alu mide ~300 pb. Selecciona las afirmaciones correctas.</p>",
-   ["El alelo (+) daría una banda de ~650 pb.",
-    "Un heterocigoto mostraría dos bandas, ~352 y ~650 pb.",
-    "El producto de 352 pb corresponde al alelo (+).",
-    "Como cae en un intrón, no se espera que cambie la secuencia de la proteína.",
-    "Por estar en un gen, este polimorfismo necesariamente altera un rasgo nutricional."],
-   [0, 1, 3],
-   "<p><strong>Correctas: 1, 2 y 4.</strong> La referencia no tiene el Alu, así que 352 pb es el alelo (−); el (+) mide ~352 + 300. "
-   "Una inserción intrónica puede ser un marcador neutro (como PV92 en CDH13); estar dentro de un gen no basta para afirmar un efecto.</p>")
+mc("B2-5 · Rubor y «tolerancia»",
+   "<p>Una estudiante de ascendencia japonesa (<em>ALDH2</em>*1/*2) se pone roja al beber. Dice que «va a entrenar su tolerancia» bebiendo más seguido hasta que deje de ponerse roja. ¿Qué le explicas?</p>",
+   ["Es buena idea: la tolerancia elimina el riesgo.",
+    "El rubor es una señal de acumulación de acetaldehído, un carcinógeno; en portadores de ALDH2*2 beber con frecuencia se asocia con mayor riesgo de cáncer de esófago, aunque el rubor disminuya. Conviene reducir el consumo.",
+    "Su genotipo la protege de cualquier daño por alcohol.",
+    "Debe tomar antihistamínicos para quitarse el rubor y seguir bebiendo."],
+   1,
+   _fb("el rubor es la alarma, no el problema.", "Quitar la señal (por adaptación o fármacos) no elimina la exposición al acetaldehído en la mucosa.",
+       ["«La tolerancia elimina el riesgo»: el acetaldehído sigue acumulándose.",
+        "«La protege»: el efecto aversivo puede reducir el consumo, pero si bebe, su riesgo es mayor.",
+        "«Antihistamínicos»: enmascaran la señal y facilitan beber más."]))
 
-ma("SM-6 · Evidencia humana en epigenética",
-   "<p>Selecciona las afirmaciones respaldadas por la evidencia revisada en clase.</p>",
-   ["Una sola sesión de ejercicio redujo la metilación de promotores como PGC-1α en músculo esquelético.",
-    "El tabaquismo materno se asocia con diferencias de metilación en miles de CpG del recién nacido, y muchas persisten en la infancia.",
-    "Los tests comerciales de «edad epigenética» están validados para tomar decisiones clínicas individuales.",
-    "Relojes como GrimAge se asocian con mortalidad, pero esa asociación no demuestra que bajar la «edad epigenética» prolongue la vida.",
-    "La metilación medida en sangre refleja siempre la del músculo o el hígado."],
-   [0, 1, 3],
-   "<p><strong>Correctas: 1, 2 y 4.</strong> Los relojes son predictores poblacionales, no diagnósticos individuales; y la metilación es específica de tejido, "
-   "así que la sangre no siempre representa a otros órganos.</p>")
+mc("B2-6 · APOE ε4 y alcohol",
+   "<p>Hombre de 50 años, <em>APOE</em> ε3/ε4, LDL 168 mg/dL, bebe 3 cervezas diarias. Su cuñado (ε2/ε3) bebe lo mismo y tiene LDL de 110 mg/dL. ¿Qué interpretación se apoya en la evidencia de interacción gen–dieta?</p>",
+   ["El alcohol baja el LDL en todos por igual.",
+    "En portadores de ε4 se ha descrito que el consumo de alcohol se asocia con LDL más alto, mientras que en portadores de ε2 se asocia con LDL más bajo; en este paciente, reducir el alcohol es una medida razonable junto con el resto del tratamiento.",
+    "La diferencia entre ambos se debe solo al alcohol.",
+    "El genotipo ε4 obliga a iniciar estatinas sin cambios de estilo de vida."],
+   1,
+   _fb("interacción APOE × alcohol sobre LDL.", "El mismo hábito puede asociarse con efectos opuestos según el genotipo; por eso la recomendación individual considera ambos.",
+       ["«Baja el LDL en todos»: es justamente lo que la interacción contradice.",
+        "«Solo al alcohol»: beben lo mismo; la diferencia sugiere el genotipo (y otros factores).",
+        "«Estatinas sin estilo de vida»: el genotipo no sustituye la evaluación clínica ni elimina la intervención dietaria."]))
 
-# ===========================================================================
-# SECCIÓN III · RELACIÓN DE COLUMNAS
-# ===========================================================================
-header("<h3>Sección III · Relación de columnas</h3>"
-       "<p>3 reactivos, 3 puntos cada uno. Cada columna derecha tiene una opción que no corresponde a nada.</p>")
+ma("B2-7 · Interpretar un reporte de FTO",
+   "<p>Mujer de 29 años, IMC 33, <em>FTO</em> rs9939609 AA. Un laboratorio comercial le recomienda «una dieta especial para su genotipo FTO». Selecciona las afirmaciones bien sustentadas.</p>",
+   ["Su genotipo se asocia con mayor riesgo de obesidad, pero no la determina.",
+    "La actividad física atenúa el efecto del alelo A sobre el IMC.",
+    "Las personas AA pierden en promedio un peso similar a las TT en intervenciones de dieta y ejercicio, así que el genotipo no es una razón para no intentarlo.",
+    "Una «dieta para FTO» tiene eficacia superior demostrada frente a una dieta saludable estándar.",
+    "Si fuera TT, no tendría riesgo de obesidad."],
+   [0, 1, 2],
+   "<p><strong>Por qué son correctas:</strong> FTO aumenta el riesgo de forma modesta; la actividad física lo atenúa, y los metaanálisis no muestran peor respuesta a la pérdida de peso en portadores del alelo A.</p>"
+   "<p><strong>Por qué no las demás:</strong> no hay evidencia sólida de que una dieta «para FTO» sea superior a una dieta saludable estándar; y ser TT no elimina el riesgo, porque el IMC es poligénico y ambiental.</p>")
 
-matching("RC-1 · Estudio → hallazgo",
-         "<p>Relaciona cada estudio con su hallazgo principal.</p>",
-         [("Ratón A<sup>vy</sup> con madre suplementada con folato, B12, colina y betaína",
-           "Más metilación del IAP y más crías de pelaje café"),
-          ("Personas concebidas durante la Hambruna Holandesa",
-           "Menos metilación de IGF2 seis décadas después"),
-          ("Gambia rural, estación de lluvias frente a seca",
-           "La dieta materna en la concepción predijo la metilación de epialelos metaestables en el bebé"),
-          ("Portadores MTHFR 677TT con folato bajo",
-           "Menor contenido de 5mC genómica que los CC"),
-          ("Restricción de metionina en células y en hígado de ratón",
-           "Caída rápida y reversible de H3K4me3"),
-          ("Sesión aguda de ejercicio",
-           "Hipometilación de promotores de PGC-1α y PDK4 en músculo")],
-         ["Aumento de HDL al inhibir un miRNA"],
-         "<p><strong>Clave:</strong> agouti → IAP; Hambruna → IGF2; Gambia → epialelos metaestables; MTHFR → 5mC genómica; "
-         "metionina → H3K4me3; ejercicio → PGC-1α. El distractor (HDL y miRNA) corresponde a miR-33.</p>")
+ma("B2-8 · Un hiperrespondedor que quizá no lo es",
+   "<p>En consulta, una paciente sube su LDL de 120 a 150 mg/dL tras dos semanas comiendo 3 huevos diarios, y la etiquetan como «hiperrespondedora genética». Selecciona las afirmaciones correctas.</p>",
+   ["Una sola medición antes y después no basta: el LDL varía entre días, y parte del cambio podría ser variabilidad intraindividual.",
+    "Para clasificarla habría que repetir mediciones o repetir el reto dietario.",
+    "El genotipo APOE (p. ej., ε4) es uno de los factores asociados con mayor respuesta del LDL al colesterol dietario.",
+    "Si es hiperrespondedora, todos sus familiares también lo serán.",
+    "Los hiporrespondedores no tienen ninguna base genética."],
+   [0, 1, 2],
+   "<p><strong>Por qué son correctas:</strong> Clasificar respondedores exige separar la respuesta real del ruido de medición; APOE es uno de los moduladores conocidos.</p>"
+   "<p><strong>Por qué no las demás:</strong> los familiares comparten solo parte de las variantes y del ambiente; y tanto la hiper como la hiporrespuesta tienen componentes genéticos.</p>")
 
-matching("RC-2 · Ensayo → lectura",
-         "<p>Relaciona cada ensayo con lo que se lee en él.</p>",
-         [("DPPH", "Disminución de absorbancia a 517 nm"),
-          ("FRAP", "Aumento de absorbancia a 593 nm al formarse Fe²⁺-TPTZ"),
-          ("Catalasa (Aebi)", "Caída de A₂₄₀ por desaparición del H₂O₂"),
-          ("SOD con NBT", "Menor formación de formazán a 560 nm"),
-          ("TBARS", "Producto de la peroxidación lipídica (MDA) como marcador de daño")],
-         ["Concentración directa de radical hidroxilo en el tejido"],
-         "<p><strong>Clave:</strong> solo FRAP sube con más antioxidante; DPPH, catalasa y SOD se leen como disminución de señal. "
-         "El •OH vive nanosegundos y no se mide directamente con estos ensayos.</p>")
+essay("B2-9 · Caso: «la leche me cae mal»",
+      "<p>Mujer de 24 años con distensión, gases y diarrea 1–2 horas después de tomar un vaso grande de leche. Tolera queso madurado y yogur. Resultados:</p>"
+      + _tabla(["Estudio", "Resultado"],
+               [("Genotipo <em>MCM6</em> −13910", "C/C"),
+                ("Genotipo <em>MCM6</em> −22018", "G/G"),
+                ("Prueba de H₂ espirado con 25 g de lactosa", "Aumento de 38 ppm sobre el basal (positiva ≥ 20 ppm), con síntomas"),
+                ("Anticuerpos para enfermedad celíaca", "Negativos")])
+      + "<p>a) Usa correctamente los términos hipolactasia, malabsorción e intolerancia para describir su caso. "
+        "b) Explica el mecanismo molecular de su genotipo (potenciador de MCM6, expresión de LCT y metilación del promotor con la edad). "
+        "c) ¿Por qué tolera queso madurado y yogur? d) Propón un manejo nutricional y di qué riesgo nutricional hay que vigilar. "
+        "e) Señala una limitación de usar solo el genotipo para diagnosticar.</p>",
+      "<p><strong>Respuesta modelo.</strong> a) Genotipo C/C y G/G de no persistencia → hipolactasia del adulto (probable); la prueba de H₂ positiva demuestra malabsorción; los síntomas durante la prueba confirman intolerancia. "
+      "b) Los alelos −13910T y −22018A, en un potenciador del intrón 13 de MCM6, mantienen la transcripción de LCT en el adulto; con C/C y G/G la expresión de lactasa declina tras el destete, y en el epitelio se acumula metilación del promotor de LCT que refuerza el silenciamiento. La enzima es normal; cambia su cantidad. "
+      "c) El queso madurado tiene muy poca lactosa (queda en el suero y se fermenta) y el yogur tiene bacterias con β-galactosidasa que la hidrolizan parcialmente, además de vaciamiento gástrico más lento. "
+      "d) No eliminar todos los lácteos: fraccionar la lactosa (dosis pequeñas con comidas), usar productos deslactosados, yogur y quesos madurados, o lactasa exógena; vigilar el aporte de calcio y vitamina D. "
+      "e) El genotipo indica la predisposición, no los síntomas; hay personas C/C sin intolerancia con dosis habituales, y otras variantes de persistencia en poblaciones no europeas no se detectan con −13910; además los síntomas podrían tener otras causas (por eso se descartó celiaquía).</p>"
+      "<p><strong>Rúbrica (6 pts):</strong> 1.5 terminología correcta de los tres niveles; 1.5 mecanismo regulatorio y epigenético; 1 explicación de la tolerancia a fermentados; 1 manejo con vigilancia de calcio/vitamina D; 1 limitación del genotipo.</p>")
 
-matching("RC-3 · Herramienta → para qué sirve en el Dry Lab",
-         "<p>Relaciona cada herramienta con su uso.</p>",
-         [("UCSC In-Silico PCR", "Obtener el amplicón y sus coordenadas a partir de dos primers"),
-          ("UCSC Genome Browser (pista GENCODE)", "Ver si el amplicón cae en exón o intrón y en qué gen"),
-          ("Primer-BLAST con genoma de referencia", "Verificar que los primers amplifican un solo producto"),
-          ("NEBcutter", "Predecir qué enzima corta un producto y el tamaño de los fragmentos"),
-          ("Ensembl (Population genetics)", "Consultar frecuencias alélicas por población de 1000 Genomas")],
-         ["Medir la expresión del gen en el tejido de un paciente"],
-         "<p><strong>Clave:</strong> ninguna de estas herramientas mide expresión en una muestra; todas trabajan sobre secuencias de referencia o bases de datos.</p>")
-
-# ===========================================================================
-# SECCIÓN IV · CADENAS MECANÍSTICAS
-# ===========================================================================
-header("<h3>Sección IV · Cadenas mecanísticas</h3>"
-       "<p>3 reactivos, 3 puntos cada uno. Completa cada eslabón; un eslabón equivocado rompe la lógica del resto.</p>")
-
-dropdowns("CM-1 · Ciclo de un carbono",
-          "<p>El folato de la dieta se convierte en 5,10-metilen-THF y la enzima [c1], que usa como cofactor [c2], lo reduce a 5-metil-THF. "
-          "La metionina sintasa, dependiente de [c3], transfiere ese metilo a la homocisteína para formar metionina, precursora del [c4]. "
-          "Una vía alterna de remetilación usa [c5], derivada de la colina. Tras donar su metilo se forma [c6], que inhibe a las metiltransferasas.</p>",
-          {"c1": (["MTHFR", "DNMT1", "BHMT", "TET"], 0),
-           "c2": (["FAD (riboflavina)", "biotina", "vitamina K", "hierro hemo"], 0),
-           "c3": (["vitamina B12", "vitamina C", "vitamina D", "tiamina"], 0),
-           "c4": (["SAM", "acetil-CoA", "NADPH", "glutatión"], 0),
-           "c5": (["betaína", "glicina", "taurina", "creatina"], 0),
-           "c6": (["SAH", "5mC", "homocisteína oxidada", "metilmalonato"], 0)},
-          "<p><strong>Cadena:</strong> MTHFR (FAD/riboflavina) → 5-metil-THF → metionina sintasa (B12) → metionina → SAM → SAH. "
-          "La betaína (BHMT) es la vía alterna. El cociente SAM/SAH es el potencial de metilación.</p>")
-
-dropdowns("CM-2 · Butirato: un metabolito, dos destinos",
-          "<p>La fibra fermentable llega al colon, donde bacterias como [b1] producen butirato. En el colonocito normal, el butirato se [b2] "
-          "y alimenta a las [b3], lo que aumenta la acetilación de histonas. En la célula tumoral, que obtiene energía principalmente por [b4], "
-          "el butirato [b5] y actúa como inhibidor de [b6], frenando la proliferación.</p>",
-          {"b1": (["<em>Faecalibacterium prausnitzii</em>", "<em>Lactobacillus delbrueckii</em> subsp. <em>bulgaricus</em>",
-                   "<em>Streptococcus thermophilus</em>", "<em>Escherichia coli</em>"], 0),
-           "b2": (["oxida a acetil-CoA en la mitocondria", "convierte en SAM", "excreta sin cambios", "polimeriza en glucógeno"], 0),
-           "b3": (["histona acetiltransferasas (HAT)", "DNA metiltransferasas", "enzimas TET", "Dicer"], 0),
-           "b4": (["glucólisis aeróbica (efecto Warburg)", "β-oxidación de butirato", "cetogénesis", "fosforilación oxidativa exclusiva"], 0),
-           "b5": (["se acumula en el núcleo", "se oxida más rápido", "se convierte en folato", "no logra entrar a la célula"], 0),
-           "b6": (["histona desacetilasas (HDAC)", "catalasa", "MTHFR", "metionina sintasa"], 0)},
-          "<p><strong>Cadena:</strong> <em>F. prausnitzii</em> → butirato → (normal) acetil-CoA → HAT; (tumoral, Warburg) se acumula → inhibe HDAC. "
-          "<em>L. bulgaricus</em> y <em>S. thermophilus</em> son homofermentativos lácticos: producen lactato, no butirato.</p>")
-
-dropdowns("CM-3 · Genotipar un SNP con PCR-RFLP",
-          "<p>Un SNP no cambia el [r1] del amplicón, así que en el gel los dos alelos se ven iguales. Para distinguirlos se usa un primer con una base "
-          "[r2] cerca de su extremo 3', que crea un sitio de restricción solo en uno de los alelos. Por ese cambio, UCSC In-Silico PCR [r3] el producto. "
-          "Después de digerir, el homocigoto sin sitio muestra [r4] banda(s) y el heterocigoto muestra [r5].</p>",
-          {"r1": (["tamaño", "color", "número de copias", "contenido de GC visible"], 0),
-           "r2": (["modificada a propósito", "metilada", "eliminada", "duplicada"], 0),
-           "r3": (["puede no encontrar", "siempre encuentra", "duplica", "corta"], 0),
-           "r4": (["una", "dos", "tres", "cero"], 0),
-           "r5": (["las bandas de ambos alelos (sin cortar y cortadas)", "solo las bandas cortadas", "una banda intermedia", "ninguna banda"], 0)},
-          "<p><strong>Cadena:</strong> mismo tamaño → primer con base modificada crea el sitio → UCSC exige coincidencia perfecta en el extremo 3' y puede no dar producto "
-          "→ homocigoto sin sitio = 1 banda; heterocigoto = banda sin cortar + fragmentos cortados (como TAS2R38 con <em>Hae</em>III).</p>")
+essay("B2-10 · Caso: reporte nutrigenético integrado",
+      "<p>Hombre de 45 años, IMC 31, LDL 162 mg/dL, presión 138/88 mmHg. Toma 4 tazas de café y 3–4 cervezas al día; sedentario. Su reporte comercial incluye:</p>"
+      + _tabla(["Gen (variante)", "Genotipo"],
+               [("<em>CYP1A2</em> rs762551", "A/C"),
+                ("<em>APOE</em>", "ε3/ε4"),
+                ("<em>ALDH2</em> rs671", "G/G (ALDH2*1/*1)"),
+                ("<em>FTO</em> rs9939609", "A/T"),
+                ("<em>MTHFR</em> C677T", "C/C")])
+      + "<p>a) Interpreta cada resultado en una o dos líneas (qué implica y qué no). "
+        "b) Ordena por prioridad tres recomendaciones y justifica cada una con un mecanismo. "
+        "c) Explica por qué un resultado «normal» en ALDH2 no significa que el alcohol sea seguro para él. "
+        "d) Menciona dos limitaciones de este tipo de reportes.</p>",
+      "<p><strong>Respuesta modelo.</strong> a) CYP1A2 A/C: portador del alelo C, metabolismo de cafeína más lento que A/A; con presión limítrofe conviene moderar el café. "
+      "APOE ε3/ε4: mayor LDL y mayor respuesta del LDL a grasa y colesterol dietarios; además, en ε4 el alcohol se asocia con LDL más alto. "
+      "ALDH2*1/*1: oxida el acetaldehído con normalidad; no tiene rubor que lo «avise». FTO A/T: un alelo de riesgo, efecto modesto y atenuable con actividad física. MTHFR C/C: sin la variante termolábil; no requiere medidas específicas. "
+      "b) 1) Reducir el alcohol: actúa sobre LDL (interacción con ε4), presión, peso y riesgo de cáncer. 2) Actividad física regular y patrón dietario con menos grasa saturada: baja LDL (relevante en ε4), atenúa el efecto de FTO y ayuda a la presión. 3) Bajar a 1–2 tazas de café: menor exposición a cafeína dada su metabolización más lenta y su presión limítrofe. "
+      "c) Sin la variante, el acetaldehído no se acumula de forma aguda, pero el etanol sigue siendo tóxico (hígado, presión, cáncer, LDL en ε4) y la falta de rubor puede facilitar beber más. "
+      "d) Las variantes explican una fracción pequeña del riesgo y casi todas provienen de asociaciones (GWAS), no de pruebas de causalidad individual; la evidencia de que dietas guiadas por genotipo sean superiores a una dieta saludable estándar es limitada; y los reportes suelen no considerar la ascendencia de la persona.</p>"
+      "<p><strong>Rúbrica (6 pts):</strong> 2 interpretación correcta de los cinco genotipos; 2 priorización con mecanismo; 1 argumento sobre ALDH2 normal; 1 dos limitaciones pertinentes.</p>")
 
 # ===========================================================================
-# SECCIÓN V · CÁLCULOS
+# BLOQUE 3 · BIOINFORMÁTICA, PCR IN SILICO E INTERPRETACIÓN DE GELES (20 pts)
 # ===========================================================================
-header("<h3>Sección V · Cálculos</h3>"
-       "<p>7 reactivos, 2 puntos cada uno. Escribe solo el número. Haz el cálculo en papel: en el examen se pide el procedimiento.</p>")
+header("<h3>Bloque 3 · Bioinformática, PCR <em>in silico</em> e interpretación de geles (20 %)</h3>"
+       "<p>9 reactivos. Ten a mano la tabla del código genético.</p>")
 
-numerical("C-1 · DPPH con blanco de muestra",
-          "<p>Un extracto de flor de cempasúchil (pigmentado) se prueba a 100 µg/mL:</p>"
-          + _tabla(["Lectura", "A<sub>517</sub>"],
-                   [("Control (DPPH + metanol)", "0.910"), ("Muestra + DPPH", "0.502"), ("Blanco de muestra (extracto sin DPPH)", "0.048")])
-          + "<p>Calcula el porcentaje de inhibición (una cifra decimal).</p>",
-          50.1, 0.5,
-          "<p>A muestra corregida = 0.502 − 0.048 = 0.454. "
-          "% = (0.910 − 0.454) / 0.910 × 100 = <strong>50.1 %</strong>. "
-          "Sin restar el blanco obtendrías 44.8 %: el pigmento haría parecer al extracto menos activo.</p>")
+mc("B3-1 · Leer una variante en la secuencia (MTHFR)",
+   "<p>Fragmento <strong>ilustrativo</strong> de la secuencia codificante de <em>MTHFR</em>, en marco de lectura, con el codón 222 entre corchetes:</p>"
+   f"<p>Referencia: {_seq('5′-… GGA [GCC] GAC …-3′')}<br>Paciente: {_seq('5′-… GGA [GTC] GAC …-3′')}</p>"
+   "<p>¿Qué cambio ocurre y cómo se clasifica?</p>",
+   ["C→T en la primera posición del codón; Ala→Ser; missense.",
+    "C→T en la segunda posición del codón; Ala→Val; missense (corresponde a C677T).",
+    "C→T en la segunda posición; Ala→Ala; sinónimo.",
+    "C→T que crea un codón de paro; nonsense."],
+   1,
+   _fb("GCC (Ala) → GTC (Val), cambio en la segunda base del codón: missense.", "Es la variante C677T: alanina 222 por valina, que vuelve termolábil a la enzima.",
+       ["«Primera posición, Ala→Ser»: la primera base (G) no cambió; Ser sería TCC o AGC.",
+        "«Sinónimo»: GTC codifica valina, no alanina.",
+        "«Nonsense»: GTC no es codón de paro (TAA, TAG, TGA)."]))
 
-numerical("C-2 · IC<sub>50</sub> por interpolación",
-          "<p>Porcentaje de inhibición de DPPH (ya corregido) de un extracto de nopal:</p>"
-          + _tabla(["µg/mL", "% inhibición"], [("10", "22"), ("25", "38"), ("50", "57"), ("100", "79")])
-          + "<p>Estima la IC<sub>50</sub> por interpolación lineal entre los dos puntos que rodean al 50 % (µg/mL, una cifra decimal).</p>",
-          40.8, 0.5,
-          "<p>El 50 % está entre 25 µg/mL (38 %) y 50 µg/mL (57 %). "
-          "IC<sub>50</sub> = 25 + (50 − 38)/(57 − 38) × (50 − 25) = 25 + 0.632 × 25 = <strong>40.8 µg/mL</strong>. "
-          "Interpolar entre puntos vecinos es razonable; extrapolar fuera de los datos no.</p>")
+dropdowns("B3-2 · Clasificar variantes en una secuencia",
+          "<p>Marco de lectura abierto ilustrativo (los números indican la posición del nucleótido desde la A del ATG):</p>"
+          f"<p>{_seq('5′-ATG GCT TGG CAG GAA CTG AAA TAA-3′')}<br>"
+          "Proteína: Met-Ala-Trp-Gln-Glu-Leu-Lys-Stop</p>"
+          "<p>Clasifica cada variante:</p>"
+          "<p>c.6T&gt;C → [v1]<br>c.9G&gt;A → [v2]<br>c.14A&gt;T → [v3]<br>c.17delT → [v4]<br>c.10_12delCAG → [v5]</p>",
+          {"v1": (["sinónima (Ala→Ala)", "missense (Ala→Pro)", "nonsense", "indel con corrimiento del marco"], 0),
+           "v2": (["nonsense (Trp→Stop)", "sinónima (Trp→Trp)", "missense (Trp→Cys)", "indel sin corrimiento del marco"], 0),
+           "v3": (["missense (Glu→Val)", "sinónima (Glu→Glu)", "nonsense", "missense (Glu→Asp)"], 0),
+           "v4": (["indel con corrimiento del marco", "indel sin corrimiento del marco", "sinónima", "nonsense directo en ese codón"], 0),
+           "v5": (["indel sin corrimiento del marco (pierde Gln)", "indel con corrimiento del marco", "nonsense", "CNV"], 0)},
+          "<p><strong>Clave:</strong> c.6T&gt;C: GCT→GCC, ambos Ala (sinónima). c.9G&gt;A: TGG→TGA, paro (nonsense). c.14A&gt;T: GAA→GTA, Glu→Val (missense). "
+          "c.17delT: se pierde 1 nt de CTG y se corre el marco desde el codón 6. c.10_12delCAG: se pierde el codón 4 completo (Gln) sin correr el marco.</p>"
+          "<p><strong>Distractores:</strong> Ala→Pro requeriría CCT; Trp tiene un solo codón (TGG), así que no hay cambio sinónimo posible; Glu→Asp requeriría GAT o GAC; una CNV es un cambio en el número de copias de un segmento grande, no la pérdida de 3 nt.</p>",
+          puntos=3.0)
 
-numerical("C-3 · FRAP: de absorbancia a µmol TE/g",
-          "<p>Curva de Trolox en FRAP: A = 0.0025·C + 0.015 (C en µM). Se extraen 250 mg de cacao en 25 mL; el extracto se diluye 1:20 y da A<sub>593</sub> = 0.440.</p>"
-          "<p>Calcula la capacidad antioxidante en µmol de equivalentes de Trolox por gramo (µmol TE/g).</p>",
-          340.0, 3.0,
-          "<p>1) C = (0.440 − 0.015)/0.0025 = 170 µM en la dilución. "
-          "2) × 20 = 3,400 µM = 3.40 µmol/mL en el extracto. "
-          "3) 3.40 µmol/mL × 25 mL = 85 µmol en 0.25 g → <strong>340 µmol TE/g</strong>. "
-          "Errores típicos: olvidar el factor de dilución (17 µmol TE/g) o normalizar dos veces.</p>")
-
-numerical("C-4 · Actividad específica de catalasa",
-          "<p>Homogenado de hígado: ΔA<sub>240</sub>/min = 0.0654 (tramo inicial), cubeta de 1 cm, volumen total 3.0 mL, volumen de muestra 0.10 mL, "
-          "proteína 2.5 mg/mL. ε<sub>240</sub>(H₂O₂) = 43.6 M⁻¹ cm⁻¹. 1 U = 1 µmol de H₂O₂ por minuto.</p>"
-          "<p>Calcula la actividad específica en U/mg de proteína.</p>",
-          18.0, 0.3,
-          "<p>U/mL = (0.0654 / 43.6) × 1000 × (3.0/0.10) = 0.0015 × 1000 × 30 = 45.0 U/mL. "
-          "Actividad específica = 45.0 / 2.5 = <strong>18.0 U/mg</strong>. "
-          "El factor 1000 convierte mol/L a µmol/mL; el cociente de volúmenes corrige la dilución en la cubeta.</p>")
-
-numerical("C-5 · Unidades de SOD",
-          "<p>Ensayo de SOD con NBT. Blanco (reacción completa sin muestra): ΔA<sub>560</sub>/min = 0.080. "
-          "Con 10 µL de muestra: ΔA/min = 0.052. Con varios volúmenes se construyó la curva, y el 50 % de inhibición se alcanza con <strong>16 µL</strong> de muestra. "
-          "Proteína de la muestra: 5.0 mg/mL. Definición: 1 U = cantidad de enzima que inhibe el 50 %.</p>"
-          "<p>Calcula la actividad específica en U/mg de proteína.</p>",
-          12.5, 0.2,
-          "<p>Con 10 µL la inhibición es (0.080 − 0.052)/0.080 = 35 %, dentro del intervalo útil, pero las unidades salen del volumen que da 50 %: "
-          "1 U en 0.016 mL → 62.5 U/mL; 62.5 / 5.0 = <strong>12.5 U/mg</strong>. "
-          "No se escala el 35 % de forma proporcional porque la relación no es lineal.</p>")
-
-numerical("C-6 · Frecuencia alélica",
-          "<p>Se genotipó TAS2R38 (PAV = catador, AVI = no catador) en 80 estudiantes: 22 PAV/PAV, 38 PAV/AVI y 20 AVI/AVI.</p>"
-          "<p>Calcula la frecuencia del alelo PAV (dos cifras decimales).</p>",
-          0.51, 0.01,
-          "<p>Alelos PAV = 2 × 22 + 38 = 82, de 2 × 80 = 160 alelos. p = 82/160 = <strong>0.51</strong>. "
-          "Heterocigotos esperados en equilibrio: 2pq × 80 = 2 × 0.5125 × 0.4875 × 80 ≈ 40, muy cerca de los 38 observados.</p>")
-
-numerical("C-7 · Potencial de metilación",
-          "<p>En hígado de ratas control: SAM = 90 nmol/g y SAH = 30 nmol/g. Tras 6 semanas sin folato ni colina: SAM = 60 nmol/g y SAH = 40 nmol/g.</p>"
-          "<p>¿En qué porcentaje <strong>disminuyó</strong> el cociente SAM/SAH? (Escribe un número positivo.)</p>",
-          50.0, 1.0,
-          "<p>Control: 90/30 = 3.0. Deficiente: 60/40 = 1.5. Disminución = (3.0 − 1.5)/3.0 × 100 = <strong>50 %</strong>. "
-          "Fíjate que el SAM solo bajó 33 %: el aumento de SAH, inhibidor de las metiltransferasas, agrava el efecto.</p>")
-
-# ===========================================================================
-# SECCIÓN VI · RESPUESTA EXTENDIDA
-# ===========================================================================
-header("<h3>Sección VI · Respuesta extendida</h3>"
-       "<p>4 reactivos, 4 puntos cada uno, ~12 minutos cada uno. Se califica con la rúbrica que aparece en la retroalimentación: "
-       "mecanismo correcto, uso explícito de los datos, límites de la evidencia y propuesta concreta.</p>")
-
-RUBRICA = (
-    "<p><strong>Rúbrica (4 pts):</strong> 1 pt mecanismo correcto y en orden; 1 pt usa los datos del caso de forma explícita; "
-    "1 pt identifica al menos una limitación o confusor relevante; 1 pt propone un siguiente paso concreto y justificado.</p>"
+GEL = (
+    "<p>Gel de agarosa al 2 % con productos de PCR de PV92 (alelo + con Alu ≈ 731 pb; alelo − sin Alu ≈ 416 pb). "
+    "M = marcador de 100 pb. «▬» indica banda y «▬ tenue» una banda débil.</p>"
+    + _tabla(["Tamaño (pb)", "M", "Carril 1", "Carril 2", "Carril 3", "Carril 4", "Carril 5", "Carril 6"],
+             [("1000", "▬", "", "", "", "", "", ""),
+              ("≈ 730", "▬ (700)", "▬", "▬", "", "", "", ""),
+              ("500", "▬", "", "", "", "", "", ""),
+              ("≈ 420", "▬ (400)", "", "▬", "▬", "", "▬", ""),
+              ("100", "▬", "", "", "", "", "", ""),
+              ("&lt; 80", "", "", "", "", "", "▬ tenue", "")])
+    + "<p>El carril 6 es el control sin DNA.</p>"
 )
 
-essay("RE-1 · ¿Mejoró el estado redox?",
-      "<p>Ratas Wistar durante 10 semanas. Valores medios por grupo (n = 8):</p>"
-      + _tabla(["Grupo", "SOD (U/mg)", "Catalasa (U/mg)", "TBARS (nmol MDA/mg)", "TAC sérica (mM TE)", "Ácido úrico (mg/dL)"],
-               [("Control", "12.1", "35.2", "1.10", "1.05", "3.1"),
-                ("Alta en fructosa (AF)", "15.8", "22.4", "2.05", "1.38", "5.9"),
-                ("AF + extracto de jamaica", "17.9", "33.0", "1.30", "1.41", "5.6")])
-      + "<p>a) Interpreta el patrón del grupo AF frente al control. b) ¿Qué cambió con el extracto y qué mecanismo lo explicaría? "
-        "c) Un compañero concluye que la fructosa es antioxidante porque subió la TAC. Responde con los datos. d) Propón un experimento o medición que haga falta.</p>",
-      "<p><strong>Respuesta modelo.</strong> a) En AF la SOD sube pero la catalasa cae: se produce más H₂O₂ del que se elimina; las TBARS casi se duplican, coherente con daño lipídico (Fenton). "
-      "b) Con el extracto la catalasa se recupera (33.0) y las TBARS bajan (1.30); SOD y catalasa altas juntas sugieren una respuesta adaptativa coordinada, compatible con activación de Nrf2 por los polifenoles. "
-      "c) La TAC sube en AF a la par del ácido úrico (3.1 → 5.9), que aporta buena parte de la TAC plasmática y se eleva con el metabolismo de la fructosa; la TAC alta no indica menos estrés, y las TBARS muestran lo contrario. "
-      "d) Medir GPx/glutatión, expresión de Nrf2 o de sus blancos (NQO1, HO-1), y hacer estadística entre grupos (ANOVA con post hoc) con la dispersión, no solo medias; caracterizar el extracto (DPPH y un segundo ensayo).</p>"
-      + RUBRICA)
+matching("B3-3 · Lectura de gel: Alu PV92",
+         GEL + "<p>Asigna el genotipo o la interpretación de cada carril.</p>",
+         [("Carril 1", "Homocigoto +/+ (inserción en ambos cromosomas)"),
+          ("Carril 2", "Heterocigoto +/−"),
+          ("Carril 3", "Homocigoto −/− (sin inserción)"),
+          ("Carril 4", "Sin producto: no se puede genotipar; repetir la PCR"),
+          ("Carril 5", "Homocigoto −/−; la banda menor de 80 pb son dímeros de cebador"),
+          ("Carril 6", "Control negativo correcto: confirma que no hubo contaminación")],
+         ["Heterocigoto con dos inserciones Alu distintas"],
+         "<p><strong>Clave:</strong> 1 = +/+ (solo 731); 2 = +/− (731 y 416); 3 = −/− (solo 416); 4 = sin banda en una muestra: falla de extracción o de PCR, no se asigna genotipo; "
+         "5 = −/− con dímeros de cebador (artefacto de &lt; 100 pb que no corresponde a ningún alelo); 6 = control sin DNA limpio. "
+         "El distractor no tiene sentido: en un locus hay a lo sumo un sitio de inserción por cromosoma, y el gel solo muestra dos tamaños posibles.</p>",
+         puntos=3.0)
 
-essay("RE-2 · «Lo que comió tu abuela decide tu diabetes»",
-      "<p>Un portal de salud publica: <em>«Ya está demostrado: lo que comió tu abuela determina si tendrás diabetes, porque la dieta se hereda en tus genes».</em></p>"
-      "<p>a) Corrige el error conceptual de «se hereda en tus genes». b) Distingue efecto intergeneracional y transgeneracional con el esquema F0–F1–F2–F3. "
-      "c) Usa dos estudios vistos en clase para decir qué sí está demostrado y qué no. d) Diseña en términos generales qué estudio haría falta para sostener el titular.</p>",
-      "<p><strong>Respuesta modelo.</strong> a) Las exposiciones no cambian la secuencia; lo que puede transmitirse son marcas epigenéticas (metilación, histonas, RNAs), y aun eso es discutido en humanos. "
-      "b) Si la gestante (F0) se expone, también se exponen el feto (F1) y sus células germinales (F2): un efecto en F1 o F2 es intergeneracional. Transgeneracional verdadero requiere F3 por vía materna (o F2 por vía paterna). "
-      "c) Hambruna Holandesa: menor metilación de IGF2 seis décadas después en los expuestos periconcepcionalmente (efecto en F1, ventana crítica). Agouti: la dieta materna cambia la metilación del IAP y el fenotipo de las crías (modelo animal). "
-      "Ninguno demuestra transmisión a nietos no expuestos en humanos ni que la marca cause diabetes. "
-      "d) Cohorte multigeneracional con exposición materna documentada, metilación medida en varias generaciones y tejidos, control del genotipo (mQTL) y del ambiente compartido (dieta y nivel socioeconómico familiar), con el desenlace (diabetes) en F3.</p>"
-      + RUBRICA)
+numerical("B3-4 · Frecuencia alélica a partir del gel del grupo",
+          "<p>El grupo completo (30 estudiantes) genotipó PV92: 12 son +/+, 10 son +/− y 8 son −/−. "
+          "Calcula la frecuencia del alelo + (dos cifras decimales).</p>",
+          0.57, 0.01,
+          "<p>Alelos + = 2 × 12 + 10 = 34 de 60 alelos → p = 34/60 = <strong>0.57</strong>. "
+          "Con Hardy–Weinberg se esperarían 2pq × 30 ≈ 14.7 heterocigotos y se observaron 10: hay un déficit que con n = 30 puede ser azar, "
+          "pero que también podría indicar heterocigotos mal leídos (amplificación preferencial del alelo corto).</p>")
 
-essay("RE-3 · Caso de nutrigenética: homocisteína alta",
-      "<p>Mujer de 34 años que planea embarazarse. Homocisteína 19 µmol/L (referencia &lt; 15), folato sérico bajo, B12 normal. "
-      "El laboratorio genotipó <em>MTHFR</em> C677T por PCR-RFLP con <em>Hin</em>fI: su carril muestra <strong>solo una banda de 175 pb</strong> (no se distingue la de 23 pb).</p>"
-      "<p>a) Asigna el genotipo y justifica con la lógica del ensayo. b) Explica con el ciclo de un carbono por qué su homocisteína está alta. "
-      "c) ¿Qué recomendación nutricional harías y por qué el genotipo no es destino? d) Señala una limitación del ensayo y una de la interpretación.</p>",
-      "<p><strong>Respuesta modelo.</strong> a) TT: todo el producto de 198 pb se cortó (175 + 23); no queda banda sin cortar del alelo C. "
-      "b) La variante 677T produce una MTHFR termolábil con menor actividad → menos 5-metil-THF → la metionina sintasa (B12) remetila menos homocisteína → se acumula homocisteína y baja el SAM. Con folato bajo el efecto se intensifica (interacción gen–nutriente). "
-      "c) Asegurar folato (alimentos y el suplemento de ácido fólico indicado antes del embarazo), riboflavina (FAD, cofactor de MTHFR) y B12 adecuada; en el estudio de clase las TT con buen folato se parecían a las CC. Revalorar homocisteína tras la intervención. "
-      "d) Ensayo: una digestión incompleta podría confundir TT y CT si quedara algo de 198 pb, por eso se incluyen controles de genotipo conocido. "
-      "Interpretación: el genotipo explica solo parte de la variación de homocisteína (influyen dieta, función renal y otras variantes); no justifica por sí solo un tratamiento distinto al que recibiría cualquier persona con folato bajo.</p>"
-      + RUBRICA)
+dropdowns("B3-5 · El ciclo térmico de la PCR",
+          "<p>En cada ciclo, la mezcla se calienta a [p1] para separar las hebras; luego se baja a una temperatura de alineamiento que se elige [p2]; "
+          "finalmente se sube a [p3], donde la [p4] extiende los cebadores en dirección [p5].</p>",
+          {"p1": (["94–95 °C", "72 °C", "55 °C", "37 °C"], 0),
+           "p2": (["unos grados por debajo de la Tm de los cebadores", "siempre a 72 °C", "por encima de 95 °C", "igual a la temperatura ambiente"], 0),
+           "p3": (["72 °C", "95 °C", "4 °C", "60 °C fijos para cualquier enzima"], 0),
+           "p4": (["Taq polimerasa", "transcriptasa reversa", "ligasa", "enzima de restricción"], 0),
+           "p5": (["5′→3′", "3′→5′", "en ambas direcciones a la vez", "del extremo 3′ del molde al 5′ del cebador"], 0)},
+          "<p><strong>Clave:</strong> 94–95 °C (desnaturalización) → alineamiento unos grados bajo la Tm de los cebadores → 72 °C, temperatura óptima de la Taq, que sintetiza 5′→3′. "
+          "Si el alineamiento es demasiado bajo aparecen productos inespecíficos y dímeros; si es demasiado alto, el cebador no se une y no hay producto.</p>")
 
-essay("RE-4 · Análisis de una afirmación comercial",
-      "<p>Una marca vende cápsulas de extracto de germinado de brócoli con este texto: <em>«El sulforafano reprograma tus genes, neutraliza los radicales libres "
-      "y, según nuestro test de saliva, reduce tu edad epigenética 10 años en 3 meses».</em></p>"
-      "<p>Evalúa cada una de las tres afirmaciones con lo visto en las unidades II y III. Para cada una di qué parte tiene sustento mecanístico, qué evidencia falta "
-      "y qué tipo de estudio la respaldaría.</p>",
-      "<p><strong>Respuesta modelo.</strong> «Reprograma tus genes»: hay sustento mecanístico parcial. Los metabolitos del sulforafano (SFN-cisteína, SFN-NAC) inhibieron HDAC y aumentaron la acetilación en el promotor de P21 en líneas celulares de cáncer de colon; "
-      "eso no cambia la secuencia ni demuestra efecto en personas que consumen la cápsula. Faltan biodisponibilidad, dosis alcanzada en tejido y ensayos en humanos. "
-      "«Neutraliza radicales»: el sulforafano actúa sobre todo de forma indirecta: es un electrófilo que modifica Keap1, activa Nrf2 e induce enzimas citoprotectoras; no es principalmente un antioxidante estequiométrico, así que la afirmación describe mal el mecanismo. "
-      "«Reduce la edad epigenética 10 años»: los relojes (Horvath, GrimAge) son predictores poblacionales; un test comercial no está validado para decisiones individuales, la metilación es específica de tejido (saliva no es hígado o colon) y un cambio en el reloj no demuestra más salud ni más vida. "
-      "Para respaldarlo haría falta un ensayo aleatorizado y controlado con placebo, reloj validado, tejido justificado, tamaño de muestra suficiente y desenlaces clínicos, no solo el marcador.</p>"
-      + RUBRICA)
+dropdowns("B3-6 · Columna de sílice: bind-wash-elute",
+          "<p>El lisado se mezcla con un buffer que contiene sales caotrópicas de [s1] y se agrega [s2]; en esas condiciones el DNA se une a la sílice. "
+          "Los lavados con buffer etanólico eliminan [s3]. Antes de eluir se hace un [s4], porque el etanol residual [s5]. "
+          "Finalmente el DNA se eluye con [s6].</p>",
+          {"s1": (["guanidina", "sodio a baja concentración", "magnesio", "Tris"], 0),
+           "s2": (["etanol", "fenol", "agua destilada", "SDS"], 0),
+           "s3": (["sales, proteínas y otros contaminantes", "el DNA unido", "la sílice", "los cebadores de PCR"], 0),
+           "s4": (["centrifugado en seco (dry spin)", "lavado con agua", "calentamiento a 95 °C", "agregado de fenol"], 0),
+           "s5": (["inhibe la PCR y dificulta la elución", "mejora el rendimiento", "es necesario para la elución", "protege al DNA de las nucleasas"], 0),
+           "s6": (["buffer de baja fuerza iónica (TE o agua, pH ≈ 8)", "buffer con guanidina concentrada", "etanol al 70 %", "cloroformo"], 0)},
+          "<p><strong>Clave:</strong> las sales de guanidina deshidratan el DNA y rompen la capa de agua de la sílice, y el etanol favorece la unión; el lavado etanólico quita sales y proteínas sin despegar el DNA; "
+          "el dry spin elimina el etanol, que inhibe la polimerasa y evita que el DNA se rehidrate; un buffer de baja fuerza iónica a pH ligeramente básico rehidrata el DNA y lo libera.</p>")
+
+mc("B3-7 · Comparar métodos de extracción",
+   "<p>Un DNA extraído con columna de sílice da A<sub>260/280</sub> = 1.84 y A<sub>260/230</sub> = 0.55, y la PCR falla. ¿Cuál es la explicación más probable y qué harías?</p>",
+   ["Contaminación con proteínas; repetir con fenol-cloroformo.",
+    "Arrastre de sales de guanidina (absorben cerca de 230 nm) por un lavado insuficiente; repetir el lavado etanólico, hacer el dry spin y volver a eluir, o purificar con perlas SPRI.",
+    "Contaminación con RNA; agregar RNasa y la PCR funcionará.",
+    "El DNA está demasiado puro; diluirlo en agua."],
+   1,
+   _fb("arrastre de guanidina.", "Una relación 260/280 cercana a 1.8 indica poca proteína; la relación 260/230 muy baja señala sales caotrópicas u otros compuestos que absorben a 230 nm y que inhiben la polimerasa.",
+       ["«Proteínas»: bajarían la relación 260/280 (por debajo de ~1.7). Fenol-cloroformo, además, añade el riesgo de arrastrar fenol (absorbe ~270 nm).",
+        "«RNA»: subiría la relación 260/280 hacia ~2.0 y no explica el 260/230 bajo.",
+        "«Demasiado puro»: no existe ese problema; los valores indican contaminación."]))
+
+mc("B3-8 · Herramientas in silico",
+   "<p>Un equipo diseña cebadores para genotipar <em>ALDH2</em> rs671. UCSC In-Silico PCR da un producto de 214 pb en el cromosoma 12, pero Primer-BLAST con el genoma de referencia reporta además un segundo producto de 214 pb en otro cromosoma. ¿Qué interpretación y acción son correctas?</p>",
+   ["Ningún problema: UCSC ya confirmó el producto, así que Primer-BLAST se equivoca.",
+    "Los cebadores pueden amplificar también una secuencia muy parecida (un parálogo o pseudogén); como el producto es del mismo tamaño, el gel no lo distinguiría y podría falsear el genotipo. Hay que rediseñar al menos un cebador en una región única y verificarlo con BLAST.",
+    "El segundo producto es el alelo variante de rs671.",
+    "Primer-BLAST solo funciona con mRNA, así que hay que ignorarlo."],
+   1,
+   _fb("riesgo de amplificación inespecífica.", "UCSC exige coincidencia casi perfecta y puede no reportar sitios con desapareamientos; Primer-BLAST evalúa la especificidad contra todo el genoma permitiendo algunos desapareamientos.",
+       ["«Primer-BLAST se equivoca»: las herramientas son complementarias; UCSC no está diseñada para buscar todos los sitios parecidos.",
+        "«Es el alelo variante»: un SNP no se ubica en otro cromosoma; ambos alelos se amplifican en el mismo locus.",
+        "«Solo con mRNA»: Primer-BLAST permite elegir el genoma de referencia como base de datos."]))
+
+mc("B3-9 · Leer el GWAS Catalog",
+   "<p>En el GWAS Catalog, rs4988235 aparece asociado a «lactase persistence» y a niveles de calcio, con «mapped gene: <em>MCM6</em>» y p = 3 × 10⁻²⁰⁰. Un alumno concluye que <em>MCM6</em> codifica la lactasa y que la variante causa directamente cambios de calcio. ¿Cuál es la mejor corrección?</p>",
+   ["El alumno tiene razón: el gen asignado es siempre el gen que codifica el fenotipo.",
+    "El «mapped gene» es el gen donde cae la variante, no necesariamente el gen efector: la variante está en un potenciador de MCM6 que regula LCT. Además, una asociación muy significativa no demuestra causalidad directa; el efecto en calcio puede ser indirecto (consumo de lácteos).",
+    "Un valor p tan pequeño prueba que el efecto es grande.",
+    "El GWAS Catalog solo incluye variantes missense."],
+   1,
+   _fb("gen asignado ≠ gen efector, y asociación ≠ causalidad.", "El umbral de significancia genómica es p &lt; 5 × 10⁻⁸; un p muy pequeño indica alta certeza estadística (por tamaños de muestra enormes), no un efecto grande ni un mecanismo.",
+       ["«Gen asignado = gen del fenotipo»: es el error que la variante de lactasa ilustra mejor.",
+        "«p pequeño = efecto grande»: el p depende también del tamaño de muestra; el efecto se lee en el OR o beta.",
+        "«Solo missense»: la mayoría de las variantes de GWAS son no codificantes."]))
+
+# ===========================================================================
+# BLOQUE 4 · CÁLCULO QUÍMICO-ENZIMÁTICO, CAPACIDAD ANTIOXIDANTE Y TROUBLESHOOTING (20 pts)
+# ===========================================================================
+header("<h3>Bloque 4 · Cálculo químico-enzimático, capacidad antioxidante y troubleshooting (20 %)</h3>"
+       "<p>5 cálculos, 4 de opción múltiple (1.5 pts c/u) y 1 de selección múltiple. Escribe solo el número en los cálculos; en el examen se pide el procedimiento.</p>"
+       "<p>Fórmulas: % inhibición = [A<sub>control</sub> − (A<sub>muestra</sub> − A<sub>blanco</sub>)] / A<sub>control</sub> × 100. "
+       "Catalasa: U/mL = (ΔA<sub>240</sub>/min) / (43.6 × l) × 1000 × (V<sub>total</sub>/V<sub>muestra</sub>).</p>")
+
+numerical("B4-1 · Porcentaje de inhibición de DPPH",
+          "<p>Extracto de jamaica a 50 µg/mL:</p>"
+          + _tabla(["Lectura", "A<sub>517</sub>"],
+                   [("Control (DPPH + metanol)", "0.950"), ("Muestra + DPPH", "0.512"), ("Blanco de muestra (extracto sin DPPH)", "0.037")])
+          + "<p>Calcula el porcentaje de inhibición (una cifra decimal).</p>",
+          50.0, 0.5,
+          "<p>A muestra corregida = 0.512 − 0.037 = 0.475. % = (0.950 − 0.475)/0.950 × 100 = <strong>50.0 %</strong>. "
+          "Sin restar el blanco saldría 46.1 %: las antocianinas absorben cerca de 517 nm y harían parecer al extracto menos activo.</p>")
+
+TABLA_IC50 = _tabla(["µg/mL", "A muestra + DPPH", "A blanco de muestra"],
+                    [("10", "0.681", "0.012"), ("20", "0.557", "0.020"), ("40", "0.405", "0.035"), ("80", "0.264", "0.062")])
+
+numerical("B4-2 · IC<sub>50</sub> con tabla de absorbancias",
+          "<p>Extracto de cáscara de granada. A<sub>517</sub> del control (DPPH + metanol) = 0.880.</p>" + TABLA_IC50
+          + "<p>Calcula el % de inhibición de cada concentración (restando el blanco) y estima la IC<sub>50</sub> por interpolación lineal entre los dos puntos que rodean al 50 % "
+            "(µg/mL, una cifra decimal).</p>",
+          31.6, 0.6,
+          "<p>% corregidos: 10 → 24.0; 20 → 39.0; 40 → 58.0; 80 → 77.0. El 50 % está entre 20 y 40 µg/mL. "
+          "IC<sub>50</sub> = 20 + (50 − 39.0)/(58.0 − 39.0) × 20 = <strong>31.6 µg/mL</strong>. "
+          "Sin restar el blanco se obtendría ≈ 35.4 µg/mL: el error sobreestima la IC<sub>50</sub> y subestima la potencia.</p>",
+          puntos=3.0)
+
+numerical("B4-3 · Capacidad antioxidante por FRAP",
+          "<p>Curva de Trolox en FRAP: A<sub>593</sub> = 0.0031·C + 0.008 (C en µM). Se extraen 0.5 g de amaranto en 10 mL; el extracto se diluye 1:10 y da A<sub>593</sub> = 0.597. "
+          "Calcula la capacidad antioxidante en µmol de equivalentes de Trolox por gramo (µmol TE/g).</p>",
+          38.0, 0.5,
+          "<p>1) C = (0.597 − 0.008)/0.0031 = 190 µM en la dilución. 2) × 10 = 1,900 µM = 1.90 µmol/mL en el extracto. "
+          "3) 1.90 × 10 mL = 19 µmol en 0.5 g → <strong>38 µmol TE/g</strong>. En FRAP la absorbancia sube con más poder reductor.</p>")
+
+numerical("B4-4 · Actividad específica de catalasa",
+          "<p>Homogenado de hígado: ΔA<sub>240</sub>/min = 0.0436 (tramo inicial), cubeta de cuarzo de 1 cm, volumen total 3.0 mL, volumen de muestra 0.05 mL, proteína 3.0 mg/mL. "
+          "ε<sub>240</sub>(H₂O₂) = 43.6 M⁻¹ cm⁻¹; 1 U = 1 µmol de H₂O₂ descompuesto por minuto. Calcula la actividad en U/mg de proteína.</p>",
+          20.0, 0.3,
+          "<p>U/mL = 0.0436/43.6 × 1000 × (3.0/0.05) = 0.001 × 1000 × 60 = 60 U/mL. Actividad específica = 60/3.0 = <strong>20 U/mg</strong>.</p>")
+
+numerical("B4-5 · Unidades de SOD",
+          "<p>Ensayo de SOD con NBT (lectura del formazán a 560 nm). Blanco (reacción completa sin muestra): ΔA/min = 0.090. Con 15 µL de muestra: ΔA/min = 0.054. "
+          "Con la curva de varios volúmenes, el 50 % de inhibición se alcanza con <strong>25 µL</strong>. Proteína: 4.0 mg/mL. 1 U = cantidad que inhibe el 50 %. "
+          "Calcula la actividad en U/mg de proteína.</p>",
+          10.0, 0.2,
+          "<p>Con 15 µL la inhibición es (0.090 − 0.054)/0.090 = 40 %, pero las unidades salen del volumen que da 50 %: 1 U en 0.025 mL = 40 U/mL; 40/4.0 = <strong>10 U/mg</strong>. "
+          "No se escala el 40 % proporcionalmente porque la relación no es lineal.</p>")
+
+mc("B4-6 · Inhibición negativa",
+   "<p>Con un extracto concentrado de betabel, la absorbancia de «muestra + DPPH» a 517 nm es mayor que la del control y el cálculo da −15 % de inhibición. ¿Qué pasó?</p>",
+   ["El betabel es prooxidante y genera DPPH•.",
+    "Las betalaínas del betabel absorben cerca de 517 nm y suman su color; falta restar el blanco de muestra (extracto sin DPPH), o diluir el extracto.",
+    "El DPPH se degradó por la luz.",
+    "La IC<sub>50</sub> del betabel es negativa."],
+   1,
+   _fb("interferencia de pigmentos.", "Es el mismo problema de las antocianinas: el color propio del extracto se lee como si fuera DPPH• sin reaccionar.",
+       ["«Genera DPPH•»: el radical solo viene del reactivo; un extracto no lo crea.",
+        "«DPPH degradado»: bajaría la absorbancia del control, no subiría la de la muestra.",
+        "«IC<sub>50</sub> negativa»: una concentración no puede ser negativa; el resultado es un artefacto."]),
+   puntos=1.5)
+
+mc("B4-7 · Un control que baja",
+   "<p>Durante la sesión, la A<sub>517</sub> del control de DPPH bajó de 0.92 (9:00 h) a 0.71 (11:30 h). El frasco quedó destapado junto a la ventana. ¿Qué haces?</p>",
+   ["Nada: el control no se usa en el cálculo.",
+    "El DPPH se degradó por la luz; preparar reactivo fresco, protegerlo de la luz y leer un control junto a cada serie de muestras. Los datos calculados con el control de 0.92 para muestras leídas más tarde están sesgados.",
+    "Ajustar todas las muestras con el control de las 9:00 h.",
+    "El control bajó porque el metanol se contaminó con antioxidantes del laboratorio."],
+   1,
+   _fb("degradación fotoquímica del DPPH.", "El control es el denominador del cálculo; si cambia durante la sesión, todas las inhibiciones calculadas con un control viejo quedan mal.",
+       ["«No se usa»: es el término A<sub>control</sub> de la fórmula.",
+        "«Usar el de las 9:00»: precisamente introduce el sesgo.",
+        "«Metanol contaminado»: es mucho menos probable que la luz, con el frasco destapado junto a la ventana."]),
+   puntos=1.5)
+
+mc("B4-8 · Catalasa fuera de rango",
+   "<p>Al iniciar el ensayo de catalasa, la A<sub>240</sub> inicial (antes de agregar muestra) es 1.85. ¿Cuál es la causa más probable y la corrección?</p>",
+   ["Es lo esperado; con más absorbancia el ensayo es más sensible.",
+    "El H₂O₂ está demasiado concentrado o se usó una cubeta de plástico que absorbe en el UV; verificar la concentración de H₂O₂ por A<sub>240</sub>, diluirlo y usar cubeta de cuarzo.",
+    "La catalasa ya está actuando.",
+    "Falta agregar más H₂O₂."],
+   1,
+   _fb("fuera del intervalo lineal del espectrofotómetro.", "Por encima de ~1 de absorbancia la lectura pierde linealidad; además el plástico común absorbe a 240 nm.",
+       ["«Más sensible»: a esas absorbancias la relación con la concentración ya no es lineal.",
+        "«La catalasa ya actúa»: aún no se agregó muestra.",
+        "«Más H₂O₂»: subiría todavía más la absorbancia."]),
+   puntos=1.5)
+
+mc("B4-9 · ¿Cuál extracto es más potente?",
+   "<p>Tres extractos dieron IC<sub>50</sub> en DPPH: A = 18 µg/mL, B = 65 µg/mL y C = «no alcanzó 50 % a 200 µg/mL». ¿Qué conclusión es correcta?</p>",
+   ["B es el más potente porque su IC<sub>50</sub> es mayor.",
+    "A es el más potente en este ensayo porque necesita menos extracto para inhibir el 50 %; para C se reporta IC<sub>50</sub> &gt; 200 µg/mL, sin extrapolar.",
+    "C es el más potente porque no se pudo medir.",
+    "A es el mejor antioxidante para el organismo."],
+   1,
+   _fb("menor IC<sub>50</sub> = mayor potencia en el ensayo.", "La IC<sub>50</sub> es una concentración: cuanto menos extracto se necesita, más activo es.",
+       ["«B porque es mayor»: es el error más frecuente; invierte la lógica.",
+        "«C porque no se pudo medir»: no alcanzar 50 % indica menor actividad en ese intervalo.",
+        "«Mejor para el organismo»: DPPH es un ensayo químico in vitro; no considera absorción ni metabolismo."]),
+   puntos=1.5)
+
+ma("B4-10 · Leer los ensayos en conjunto",
+   "<p>Ratas con dieta alta en grasa durante 8 semanas, frente al control:</p>"
+   + _tabla(["Marcador", "Cambio"],
+            [("SOD hepática (U/mg)", "↑ 55 %"), ("Catalasa hepática (U/mg)", "↓ 30 %"), ("TBARS (MDA)", "↑ 80 %"), ("TAC sérica", "↑ 20 %, con ácido úrico ↑ 45 %")])
+   + "<p>Selecciona las interpretaciones bien sustentadas.</p>",
+   ["Se produce más H₂O₂ del que se elimina; el H₂O₂ acumulado puede generar radical hidroxilo por Fenton, coherente con el aumento de TBARS.",
+    "El aumento de TAC sérica no indica menos estrés oxidativo: el ácido úrico aporta buena parte de la TAC plasmática.",
+    "Más SOD significa que el estado antioxidante mejoró.",
+    "Conviene confirmar con otra vía de eliminación de H₂O₂ (glutatión peroxidasa) antes de concluir.",
+    "La TAC alta demuestra que la dieta alta en grasa es antioxidante."],
+   [0, 1, 3],
+   "<p><strong>Por qué son correctas:</strong> SOD alta con catalasa baja es un desbalance: cambia una especie reactiva (O₂•⁻) por otra (H₂O₂) que no se elimina; las TBARS confirman daño lipídico.</p>"
+   "<p><strong>Por qué no las demás:</strong> una enzima elevada puede indicar más estrés, no mejor salud; y una TAC alta explicada por urato no es evidencia de efecto antioxidante.</p>")
+
+
+def _barajar():
+    """Baraja las opciones de mc/ma con semilla fija para que la letra correcta no sea siempre la misma
+    en el Word impreso (Canvas además las baraja por alumno)."""
+    import random
+    for r in REACTIVOS:
+        if r["type"] not in ("mc", "ma"):
+            continue
+        rng = random.Random(r["title"])
+        orden = list(range(len(r["choices"])))
+        rng.shuffle(orden)
+        r["choices"] = [r["choices"][i] for i in orden]
+        if r["type"] == "mc":
+            r["correct"] = orden.index(r["correct"])
+        else:
+            r["correct"] = sorted(orden.index(i) for i in r["correct"])
+
+
+_barajar()

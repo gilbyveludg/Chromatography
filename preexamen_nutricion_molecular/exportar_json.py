@@ -49,6 +49,10 @@ class Bloques(HTMLParser):
             self.estilo.add("i")
         elif tag in ("sub", "sup"):
             self.estilo.add(tag)
+        elif tag == "code":
+            self.estilo.add("m")
+        elif tag == "br" and self.celda is None:
+            self._vaciar()
         if tag == "th":
             self.estilo.add("b")
 
@@ -74,6 +78,8 @@ class Bloques(HTMLParser):
             self.estilo.discard("i")
         elif tag in ("sub", "sup"):
             self.estilo.discard(tag)
+        elif tag == "code":
+            self.estilo.discard("m")
 
     def handle_data(self, data):
         if not data.strip() and not self.runs and self.celda is None:
