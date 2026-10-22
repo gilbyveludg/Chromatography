@@ -13,9 +13,11 @@ Los casos y valores son distintos a los ejemplos de clase.
 | Archivo | Para qué |
 |---|---|
 | `preexamen_nutricion_molecular_qti.zip` | Paquete QTI 1.2 listo para importar en Canvas. |
+| `Preexamen_Nutricion_Molecular_con_respuestas.docx` | Versión Word para el docente: todas las preguntas con respuestas, explicaciones y rúbricas. |
 | `clave_docente.md` | Respuestas, retroalimentación y rúbricas. No se entrega a los alumnos. |
 | `banco_preguntas.py` | Banco de reactivos; se edita aquí. |
 | `generar_qti.py` | Regenera el .zip y la clave: `python3 generar_qti.py`. |
+| `exportar_json.py`, `generar_word.js` | Regeneran el Word: `python3 exportar_json.py banco.json && node generar_word.js banco.json Preexamen_Nutricion_Molecular_con_respuestas.docx`. |
 
 ## Importar en Canvas
 
