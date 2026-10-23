@@ -38,13 +38,5 @@ Configuración incluida: cuestionario de práctica, 180 min, intentos ilimitados
 
 Las 2 preguntas de respuesta extendida se califican a mano con la rúbrica incluida.
 
-| Sección | Reactivos | Puntos | Min sugeridos |
-|---|---|---|---|
-| I. Opción múltiple razonada | 25 | 40 | 50 |
-| II. Selección múltiple | 6 | 12 | 18 |
-| III. Relación de columnas | 3 | 9 | 12 |
-| IV. Cadenas mecanísticas (menús desplegables) | 3 | 9 | 12 |
-| V. Cálculos (numéricos con tolerancia) | 7 | 14 | 30 |
-| VI. Respuesta extendida (calificación manual) | 4 | 16 | 48 |
 
 Las letras de la clave siguen el orden del banco; como Canvas baraja las opciones, el alumno las verá en otro orden.
