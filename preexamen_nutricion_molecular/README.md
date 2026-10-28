@@ -15,9 +15,11 @@ Los casos y valores son distintos a los ejemplos de clase.
 |---|---|
 | `preexamen_nutricion_molecular_qti.zip` | Paquete QTI 1.2 listo para importar en Canvas. |
 | `Preexamen_Genoma_Crudo_a_la_Clinica_con_clave.docx` | Word: el examen completo y, al final, la clave con la justificación de cada reactivo y las rúbricas. |
+| `Revision_Preexamen_Genoma_Crudo_a_la_Clinica.pptx` / `.pdf` | Presentación para exponer: cada reactivo con una diapositiva de pregunta y otra de respuesta explicada (justificación completa en las notas del orador). |
 | `clave_docente.md` | Respuestas, retroalimentación y rúbricas. No se entrega a los alumnos. |
 | `banco_preguntas.py` | Banco de reactivos; se edita aquí. |
 | `generar_qti.py` | Regenera el .zip y la clave: `python3 generar_qti.py`. |
+| `generar_ppt.js` | Regenera la presentación: `node generar_ppt.js banco.json Revision_Preexamen_Genoma_Crudo_a_la_Clinica.pptx` (requiere `pptxgenjs`, `react-icons`, `react`, `react-dom` y `sharp`). |
 | `exportar_json.py`, `generar_word.js` | Regeneran el Word: `python3 exportar_json.py banco.json && node generar_word.js banco.json Preexamen_Genoma_Crudo_a_la_Clinica_con_clave.docx`. |
 
 ## Importar en Canvas
