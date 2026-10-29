@@ -8,6 +8,7 @@ Examen calificado en Canvas, **2 horas en línea**, con la misma estructura y pe
 |---|---|
 | `examen_nutricion_molecular_qti.zip` | Paquete QTI 1.2 para importar en Canvas. |
 | `Examen_Genoma_Crudo_a_la_Clinica_con_clave.docx` / `.pdf` | El examen completo y, al final, la clave con la justificación de cada reactivo y las rúbricas. Solo para el docente. |
+| `Examen_Genoma_Crudo_a_la_Clinica_sin_respuestas.pdf` | Solo el examen, sin clave (para revisar o imprimir). |
 | `clave_docente.md` | Clave en texto. |
 | `banco_examen.py` | Banco de reactivos; se edita aquí. |
 
