@@ -1,32 +1,56 @@
 # -*- coding: utf-8 -*-
-"""Genera el paquete QTI 1.2 (formato de exportación de Canvas) del preexamen.
+"""Genera el paquete QTI 1.2 (formato de exportación de Canvas) de un banco de reactivos.
 
-Uso:  python3 generar_qti.py
-Salida:
-  preexamen_nutricion_molecular_qti.zip  -> Canvas: Configuración > Importar contenido del curso > Paquete QTI .zip
-  clave_docente.md                       -> respuestas y retroalimentación para el docente
+Uso:  python3 generar_qti.py [ruta/al/banco.py]
+      (sin argumento usa banco_preguntas.py de esta carpeta: el preexamen)
+Salida, junto al banco:
+  <ARCHIVO_ZIP del banco>  -> Canvas: Configuración > Importar contenido del curso > Paquete QTI .zip
+  clave_docente.md         -> respuestas y retroalimentación para el docente
+
+El banco puede definir CANVAS (dict) para cambiar la configuración del cuestionario.
 """
 import hashlib
+import importlib.util
 import os
 import re
+import sys
 import zipfile
 from xml.sax.saxutils import escape
 
-import banco_preguntas as banco
 
-AQUI = os.path.dirname(os.path.abspath(__file__))
-ZIP_SALIDA = os.path.join(AQUI, "preexamen_nutricion_molecular_qti.zip")
+def _cargar_banco():
+    ruta = os.environ.get("BANCO") or (sys.argv[1] if __name__ == "__main__" and len(sys.argv) > 1 else None)
+    ruta = os.path.abspath(ruta or os.path.join(os.path.dirname(os.path.abspath(__file__)), "banco_preguntas.py"))
+    spec = importlib.util.spec_from_file_location("banco", ruta)
+    modulo = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(modulo)
+    return modulo, os.path.dirname(ruta)
+
+
+banco, AQUI = _cargar_banco()
+ZIP_SALIDA = os.path.join(AQUI, getattr(banco, "ARCHIVO_ZIP", "preexamen_nutricion_molecular_qti.zip"))
 CLAVE_SALIDA = os.path.join(AQUI, "clave_docente.md")
 
-LIMITE_MIN = 180
-INTENTOS = -1  # ilimitados: es material de estudio
+# Configuración de Canvas: por defecto, cuestionario de práctica (preexamen).
+CANVAS = {
+    "quiz_type": "practice_quiz",
+    "time_limit": 180,
+    "allowed_attempts": -1,  # ilimitados: es material de estudio
+    "show_correct_answers": "true",
+    "hide_results": "",
+    "one_question_at_a_time": "false",
+    "cant_go_back": "false",
+    "scoring_policy": "keep_highest",
+}
+CANVAS.update(getattr(banco, "CANVAS", {}))
+LIMITE_MIN = CANVAS["time_limit"]
 
 
 def ident(*partes):
     return "g" + hashlib.md5("|".join(map(str, partes)).encode()).hexdigest()
 
 
-QUIZ_ID = ident("preexamen-nutricion-molecular-2026")
+QUIZ_ID = ident(getattr(banco, "ID_CUESTIONARIO", "preexamen-nutricion-molecular-2026"))
 META_ID = ident(QUIZ_ID, "meta")
 
 
@@ -143,7 +167,7 @@ def evaluacion_xml():
             'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
             'xsi:schemaLocation="http://www.imsglobal.org/xsd/ims_qtiasiv1p2 http://www.imsglobal.org/xsd/ims_qtiasiv1p2p1.xsd">'
             f'<assessment ident="{QUIZ_ID}" title="{escape(banco.TITULO)}"><qtimetadata>'
-            f'<qtimetadatafield><fieldlabel>cc_maxattempts</fieldlabel><fieldentry>unlimited</fieldentry></qtimetadatafield>'
+            f'<qtimetadatafield><fieldlabel>cc_maxattempts</fieldlabel><fieldentry>{'unlimited' if CANVAS['allowed_attempts'] == -1 else CANVAS['allowed_attempts']}</fieldentry></qtimetadatafield>'
             f'<qtimetadatafield><fieldlabel>qmd_timelimit</fieldlabel><fieldentry>{LIMITE_MIN}</fieldentry></qtimetadatafield>'
             f'</qtimetadata><section ident="root_section">{items}</section></assessment></questestinterop>\n')
 
@@ -153,21 +177,21 @@ def meta_xml():
         "title": escape(banco.TITULO),
         "description": escape(banco.DESCRIPCION.strip()),
         "shuffle_answers": "true",
-        "scoring_policy": "keep_highest",
-        "hide_results": "",
-        "quiz_type": "practice_quiz",
+        "scoring_policy": CANVAS["scoring_policy"],
+        "hide_results": CANVAS["hide_results"],
+        "quiz_type": CANVAS["quiz_type"],
         "points_possible": f"{puntos_totales():.1f}",
         "require_lockdown_browser": "false",
         "require_lockdown_browser_for_results": "false",
         "require_lockdown_browser_monitor": "false",
         "lockdown_browser_monitor_data": "",
-        "show_correct_answers": "true",
+        "show_correct_answers": CANVAS["show_correct_answers"],
         "anonymous_submissions": "false",
         "could_be_locked": "false",
         "time_limit": str(LIMITE_MIN),
-        "allowed_attempts": str(INTENTOS),
-        "one_question_at_a_time": "false",
-        "cant_go_back": "false",
+        "allowed_attempts": str(CANVAS["allowed_attempts"]),
+        "one_question_at_a_time": CANVAS["one_question_at_a_time"],
+        "cant_go_back": CANVAS["cant_go_back"],
         "available": "false",
         "one_time_results": "false",
         "show_correct_answers_last_attempt": "false",

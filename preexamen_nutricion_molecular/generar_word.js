@@ -1,4 +1,4 @@
-// Genera el Word del preexamen: primero el examen (sin respuestas) y al final la clave completa.
+// Genera el Word de un examen: primero el examen (sin respuestas) y al final la clave completa.
 // Uso: node generar_word.js banco.json salida.docx
 const fs = require("fs");
 const {
@@ -188,7 +188,7 @@ const doc = new Document({
   sections: [{
     properties: { page: { size: { width: 12240, height: 15840 }, margin: { top: 1440, bottom: 1440, left: 1440, right: 1440 } } },
     footers: {
-      default: new Footer({ children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [texto("Preexamen · Del Genoma Crudo a la Clínica · ", { color: GRIS, size: 18 }), new TextRun({ children: [PageNumber.CURRENT], color: GRIS, size: 18 })] })] }),
+      default: new Footer({ children: [new Paragraph({ alignment: AlignmentType.RIGHT, children: [texto(`${banco.pie} · `, { color: GRIS, size: 18 }), new TextRun({ children: [PageNumber.CURRENT], color: GRIS, size: 18 })] })] }),
     },
     children: cuerpo,
   }],

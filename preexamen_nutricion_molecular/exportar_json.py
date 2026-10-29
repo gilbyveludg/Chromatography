@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
-"""Convierte el banco de reactivos a JSON estructurado para generar el Word (generar_word.js)."""
+"""Convierte un banco de reactivos a JSON estructurado para generar el Word (generar_word.js) y la presentación.
+
+Uso: python3 exportar_json.py salida.json  (el banco se elige con la variable BANCO; sin ella, el del preexamen)
+"""
 import json
 import os
 import re
 import sys
 from html.parser import HTMLParser
 
-import banco_preguntas as banco
-from generar_qti import puntos_totales, LIMITE_MIN
+from generar_qti import banco, puntos_totales, LIMITE_MIN
 
 
 class Bloques(HTMLParser):
@@ -104,7 +106,7 @@ def plano(html):
 
 
 def main():
-    salida = {"titulo": banco.TITULO, "total": puntos_totales(), "minutos": LIMITE_MIN,
+    salida = {"titulo": banco.TITULO, "pie": getattr(banco, "PIE", banco.TITULO), "portada": getattr(banco, "PORTADA_WORD", ""), "total": puntos_totales(), "minutos": LIMITE_MIN,
               "descripcion": bloques(banco.DESCRIPCION), "reactivos": []}
     for r in banco.REACTIVOS:
         d = {"tipo": r["type"]}
