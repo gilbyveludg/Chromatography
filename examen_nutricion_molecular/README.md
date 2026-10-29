@@ -11,6 +11,7 @@ Examen calificado en Canvas, **2 horas en línea**, con la misma estructura y pe
 | `Examen_Genoma_Crudo_a_la_Clinica_sin_respuestas.pdf` | Solo el examen, sin clave (para revisar o imprimir). |
 | `clave_docente.md` | Clave en texto. |
 | `banco_examen.py` | Banco de reactivos; se edita aquí. |
+| `figuras_examen.py`, `figuras/` | Genera las 5 gráficas con datos simulados del bloque 1 (`python3 figuras_examen.py`, requiere matplotlib). Van dentro del .zip y se copian a Archivos del curso al importar. |
 
 ## Estructura (100 puntos, 120 min)
 
@@ -32,6 +33,7 @@ Cuestionario calificado, 120 min, **un intento**, opciones barajadas, sin mostra
 Los generadores están en `../preexamen_nutricion_molecular/`:
 
 ```bash
+python3 figuras_examen.py
 python3 ../preexamen_nutricion_molecular/generar_qti.py banco_examen.py
 BANCO=banco_examen.py python3 ../preexamen_nutricion_molecular/exportar_json.py examen.json
 node ../preexamen_nutricion_molecular/generar_word.js examen.json Examen_Genoma_Crudo_a_la_Clinica_con_clave.docx

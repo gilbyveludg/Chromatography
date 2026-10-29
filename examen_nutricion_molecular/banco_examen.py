@@ -55,6 +55,11 @@ def _tabla(encabezados, filas):
     return f"<table style='border-collapse:collapse;margin:8px 0'><tr>{th}</tr>{trs}</table>"
 
 
+def _fig(ruta, alt):
+    """Imagen con datos simulados (se incluye en el paquete de Canvas y en el Word)."""
+    return f"<p><img src='{ruta}' alt='{alt}' style='max-width:100%'></p>"
+
+
 def _seq(texto):
     return f"<code>{texto}</code>"
 
@@ -132,18 +137,19 @@ REACTIVOS.append({
 header("<h3>Bloque 1 · Fundamentos moleculares y ómicos (30 %)</h3>"
        "<p>10 reactivos de opción múltiple, 3 puntos cada uno. Elige la opción mejor justificada.</p>")
 
-mc("E1-1 · Probar que una variante actúa en cis",
-   "<p>Se quiere demostrar que el alelo −13910T aumenta la transcripción de <em>LCT</em> en el propio cromosoma que lo porta (efecto en <em>cis</em>) y no por un factor general del individuo. "
-   "Se dispone de biopsias intestinales de adultos heterocigotos C/T que también son heterocigotos para un SNP sinónimo dentro del exón de <em>LCT</em>. ¿Qué medición lo demuestra mejor?</p>",
-   ["Secuenciar el genoma completo de cada persona.",
-    "Medir la expresión específica de alelo: comparar, dentro de la misma biopsia, cuánto mRNA de LCT proviene del cromosoma con T y cuánto del cromosoma con C, usando el SNP exónico como marcador.",
-    "Medir la lactasa total en heces.",
-    "Comparar la actividad de lactasa entre personas C/C y T/T de distintas familias."],
-   1,
-   _fb("expresión específica de alelo.", "Dentro de una misma célula ambos cromosomas comparten el mismo ambiente (factores de transcripción, dieta, edad); si el cromosoma con T produce más mRNA que el de C, la diferencia solo puede deberse a la secuencia en cis.",
-       ["«Secuenciar el genoma»: describe las variantes, no mide su efecto en la expresión.",
-        "«Lactasa en heces»: no es una medición válida de la expresión intestinal y no separa los alelos.",
-        "«Comparar C/C y T/T»: muestra asociación entre personas, pero mezcla diferencias de edad, dieta, ascendencia y daño de mucosa; no aísla el efecto en cis."]))
+mc("E1-1 · Lactasa y genotipo: leer los datos",
+   "<p>Un laboratorio midió la actividad de lactasa en biopsias intestinales de 36 adultos y los genotipificó para <em>MCM6</em> −13910 (alelo T = persistencia de lactasa).</p>"
+   + _fig("figuras/e1-1_lactasa.png", "Gráfica de puntos de la actividad de lactasa por genotipo MCM6 −13910 (C/C, C/T y T/T).")
+   + "<p>¿Qué conclusión apoyan mejor los datos?</p>",
+   ["Basta una copia del alelo T para mantener la actividad alta (C/T se parece a T/T), y la persona 36 sugiere que otra causa, como daño de la mucosa intestinal, puede bajar la actividad aunque el genotipo sea favorable.",
+    "C/T tiene exactamente la mitad de actividad que T/T, así que cada alelo aporta lo mismo.",
+    "El genotipo explica toda la actividad de lactasa: ninguna persona se sale de su grupo.",
+    "La persona 36 demuestra que el alelo T no tiene relación con la actividad de lactasa."],
+   0,
+   _fb("un alelo T basta, y el genotipo no explica todos los casos.", "Las medianas de C/T y T/T son parecidas y muy superiores a C/C: el alelo de persistencia se comporta como dominante. Un dato aislado fuera de su grupo se investiga (p. ej., daño de la mucosa tras una infección o enfermedad celíaca), no invalida la tendencia del grupo.",
+       ["«Exactamente la mitad»: la mediana de C/T es cercana a la de T/T, no la mitad.",
+        "«Explica toda la actividad»: la persona 36 es justamente la excepción.",
+        "«No hay relación»: una sola excepción no borra la diferencia clara entre C/C y los portadores de T."]))
 
 mc("E1-2 · ¿Cuál variante preocupa más?",
    "<p>En el gen de una enzima metabólica se encuentran dos variantes en un paciente: (1) un missense que cambia un residuo de la superficie, poco conservado entre especies, Lys→Arg; "
@@ -158,42 +164,51 @@ mc("E1-2 · ¿Cuál variante preocupa más?",
         "«Mismo gen, misma gravedad»: el efecto depende de la posición y del tipo de cambio, no solo del gen.",
         "«Solo los nonsense tienen efecto»: missense y cambios de splicing también pueden ser patogénicos."]))
 
-mc("E1-3 · Una CNV que el genotipado no ve",
-   "<p>Un estudio genotipa el SNP más cercano al locus <em>AMY1</em> con una PCR de punto final y no encuentra asociación con la actividad de amilasa salival. "
-   "Otro estudio en la misma población, con PCR digital, encuentra que el número de copias de <em>AMY1</em> (de 2 a 14) sí se asocia. ¿Cuál es la explicación más probable?</p>",
-   ["El segundo estudio se equivocó porque usó una técnica más nueva.",
-    "La variación relevante es el número de copias del gen; un ensayo diseñado para leer las bases de un SNP no cuantifica cuántas copias hay, así que no captura el efecto de dosis.",
-    "La amilasa salival no depende del DNA.",
-    "La PCR de punto final siempre detecta CNV si se corre un gel."],
-   1,
-   _fb("se midió el tipo de variante equivocado.", "La pregunta biológica (dosis génica) exige un método cuantitativo del número de copias (PCR digital o qPCR relativa, arreglos de CNV).",
-       ["«Técnica más nueva = error»: la técnica correcta es la que mide la variable relevante.",
-        "«No depende del DNA»: la asociación con el número de copias muestra lo contrario.",
-        "«Punto final detecta CNV»: la PCR de punto final llega a una meseta y no es cuantitativa."]))
+mc("E1-3 · Copias de un gen: lo que el gel no muestra",
+   "<p>El gen de la amilasa salival (<em>AMY1</em>) puede estar repetido: hay personas con 2 copias y otras con más de 10. "
+   "Un equipo amplificó un fragmento de <em>AMY1</em> por PCR de punto final en cuatro personas (P1–P4) y lo corrió en un gel (A). "
+   "Con otro método, que sí cuenta cuántas copias tiene cada persona, obtuvo la relación del panel B.</p>"
+   + _fig("figuras/e1-3_amy1.png", "Panel A: gel de agarosa con el producto de PCR de AMY1 de cuatro personas. Panel B: actividad de amilasa en saliva frente al número de copias del gen AMY1.")
+   + "<p>¿Por qué las cuatro bandas del gel se ven iguales si P4 tiene siete veces más copias que P1?</p>",
+   ["Porque la PCR de punto final solo dice si el fragmento está y de qué tamaño es: tras muchos ciclos la reacción se satura, y la intensidad final de la banda ya no refleja cuántas copias había al inicio.",
+    "Porque P1 a P4 tienen en realidad el mismo número de copias; el panel B está mal.",
+    "Porque el gel debió correrse más tiempo para separar las copias.",
+    "Porque las copias extra de AMY1 no se amplifican por PCR."],
+   0,
+   _fb("la PCR de punto final no cuantifica.", "Al final de la reacción se agotan reactivos y todas las muestras llegan a una cantidad parecida de producto (meseta). Las copias tienen la misma secuencia y el mismo tamaño, así que no aparecen como bandas distintas. Para medir dosis génica se necesita un método que cuente copias; el panel B muestra que más copias se asocian con más amilasa.",
+       ["«Tienen el mismo número de copias»: el método que cuenta copias muestra lo contrario.",
+        "«Correr más el gel»: todas las copias miden lo mismo; no hay nada que separar por tamaño.",
+        "«Las copias extra no se amplifican»: tienen la misma secuencia, así que los cebadores también se unen a ellas."]))
 
-mc("E1-4 · Cómo identificar respondedores de verdad",
-   "<p>Un grupo quiere clasificar a 40 personas como hiper o hiporrespondedoras del LDL a la grasa saturada. ¿Cuál diseño separa mejor la respuesta individual verdadera del ruido?</p>",
-   ["Una sola medición de LDL después de 4 semanas de dieta alta en grasa saturada.",
-    "Un ensayo cruzado: cada persona pasa por dieta control y dieta alta en grasa saturada en orden aleatorio, con lavado entre fases y mediciones repetidas de LDL en cada fase; idealmente repitiendo el reto.",
-    "Preguntar a cada persona si siente que la grasa le sube el colesterol.",
-    "Comparar a las personas de LDL más alto con las de LDL más bajo en una sola toma."],
+mc("E1-4 · Un alimento funcional y la respuesta de cada persona",
+   "<p>Una empresa de lácteos desarrolló un yogur con 3 g/día de β-glucano de avena y lo probó durante 4 semanas en 20 voluntarios con LDL limítrofe. "
+   "La gráfica muestra el cambio de LDL de cada participante.</p>"
+   + _fig("figuras/e1-4_betaglucano.png", "Gráfica de barras con el cambio de LDL de cada uno de los 20 participantes y la línea del promedio.")
+   + "<p>El área de mercadotecnia quiere poner en la etiqueta: «Reduce tu colesterol LDL 5.5 %». ¿Cuál es la lectura más rigurosa de los datos?</p>",
+   ["La frase es correcta: todos los consumidores bajarán 5.5 %.",
+    "El promedio esconde respuestas muy distintas: hay hiperrespondedores (bajan más de 12 %), respuestas pequeñas y algunos sin efecto; antes de prometer un número habría que confirmar con un estudio controlado (con placebo y más participantes) y comunicar el efecto como promedio.",
+    "El yogur no funciona, porque cinco personas subieron su LDL.",
+    "Las diferencias se deben a que cada persona recibió una dosis distinta de β-glucano."],
    1,
-   _fb("cruzado con mediciones repetidas.", "Cada persona es su propio control y las mediciones repetidas permiten estimar la variabilidad intraindividual; solo así una diferencia grande se interpreta como respuesta y no como ruido o regresión a la media.",
-       ["«Una sola medición»: no hay comparación con la condición control de la misma persona.",
-        "«Preguntar»: la percepción no mide el LDL.",
-        "«Comparar extremos en una toma»: confunde nivel basal con respuesta a la dieta."]))
+   _fb("respuesta interindividual: el promedio no describe a cada persona.", "Para un alimento funcional, el promedio sirve para la declaración de propiedades, pero la variación individual (genética, microbiota, dieta habitual) explica por qué no todos responden igual. Sin grupo placebo tampoco se sabe qué parte del cambio se debe al yogur.",
+       ["«Todos bajarán 5.5 %»: la gráfica muestra respuestas de −19 % a +6 %.",
+        "«No funciona»: la mayoría bajó; la existencia de no respondedores no anula el efecto promedio.",
+        "«Dosis distinta»: todos recibieron la misma dosis; la variación es de la respuesta, no de la dosis."]))
 
 mc("E1-5 · Un AVI/AVI que percibe el amargo",
-   "<p>Una estudiante con genotipo <em>TAS2R38</em> AVI/AVI califica el PROP como «muy amargo», con un puntaje similar al de compañeros PAV/PAV. ¿Cuál interpretación es la más rigurosa?</p>",
+   "<p>Contexto: el <strong>PROP</strong> (6-n-propiltiouracilo) es un compuesto amargo que se usa en pruebas de gusto: se coloca una tira de papel impregnada en la lengua y la persona califica qué tan amarga la percibe. "
+   "Tiene el mismo grupo químico (N–C=S) que el PTC y que ciertos compuestos de las crucíferas (brócoli, col), y es detectado por el receptor <em>TAS2R38</em>. "
+   "En promedio, las personas PAV/PAV lo perciben muy amargo y las AVI/AVI casi no lo perciben.</p>"
+   "<p>En una práctica, una estudiante con genotipo AVI/AVI califica la tira de PROP como «muy amarga», con un puntaje similar al de compañeros PAV/PAV. ¿Cuál interpretación es la más rigurosa?</p>",
    ["El genotipado debe estar mal, porque AVI/AVI siempre es no catador.",
-    "TAS2R38 explica gran parte de la variación en la percepción de PROP, pero no toda: influyen otros genes de receptores, la densidad de papilas fungiformes, la técnica de la prueba y factores de atención. Antes de dudar del genotipo, conviene repetir la prueba con controles.",
-    "Los AVI/AVI son en realidad «supertasters».",
+    "TAS2R38 explica gran parte de la variación en la percepción del PROP, pero no toda: influyen otros receptores del amargo, el número de papilas gustativas en la lengua y cómo se hizo la prueba. Antes de dudar del genotipo, conviene repetir la prueba con una tira control (sin PROP).",
+    "Las personas AVI/AVI son en realidad las más sensibles al amargo.",
     "La percepción del amargo no tiene relación con TAS2R38."],
    1,
-   _fb("un gen mayor no es el único determinante.", "Es un caso de penetrancia incompleta de un rasgo de gran efecto; la excepción obliga a revisar método y otros factores, no a negar la asociación.",
+   _fb("un gen de gran efecto no es el único determinante.", "La excepción obliga a revisar el método (tira control, repetición) y otros factores, no a negar una de las asociaciones más sólidas de la nutrigenética.",
        ["«Genotipo mal»: es una posibilidad a verificar, no la conclusión automática.",
-        "«AVI/AVI son supertasters»: invierte la relación promedio.",
-        "«Sin relación»: la asociación TAS2R38–PROP es de las más robustas de la nutrigenética."]))
+        "«AVI/AVI son los más sensibles»: invierte la relación promedio.",
+        "«Sin relación»: la asociación TAS2R38–PROP es muy robusta."]))
 
 mc("E1-6 · Tamiz neonatal: PKU sí, lactasa no",
    "<p>¿Por qué se tamiza fenilcetonuria (<em>PAH</em>) en todos los recién nacidos, pero no se tamiza el genotipo de persistencia de lactasa?</p>",
@@ -231,29 +246,34 @@ mc("E1-8 · MTHFR en un país que fortifica",
         "«Dejaron de absorber»: no hay evidencia de ese mecanismo; el folato aumenta.",
         "«No depende del folato»: el folato es el donador de metilo para remetilar la homocisteína."]))
 
-mc("E1-9 · ALDH2 como experimento natural",
-   "<p>Varios estudios usan el genotipo <em>ALDH2</em> rs671 para estimar el efecto causal del alcohol sobre la presión arterial: los portadores de ALDH2*2 beben menos por el rubor y tienen presión más baja. ¿Por qué este diseño (aleatorización mendeliana) fortalece la inferencia causal?</p>",
-   ["Porque el genotipo se asigna al azar en la concepción, antes de los hábitos; así no está confundido por nivel socioeconómico o tabaco, y si el genotipo que reduce el consumo también reduce la presión, apoya que el alcohol eleva la presión.",
-    "Porque ALDH2 controla directamente la presión arterial.",
-    "Porque elimina la necesidad de medir el consumo de alcohol.",
-    "Porque demuestra que el acetaldehído baja la presión."],
+mc("E1-9 · ALDH2: leer las curvas de acetaldehído",
+   "<p>Se midió el acetaldehído en sangre después de una bebida estándar en personas con los tres genotipos de <em>ALDH2</em> rs671. "
+   "La enzima ALDH2 funciona como un complejo de cuatro subunidades (tetrámero).</p>"
+   + _fig("figuras/e1-9_aldh2.png", "Curvas de acetaldehído en sangre a lo largo del tiempo para los genotipos ALDH2 *1/*1, *1/*2 y *2/*2.")
+   + "<p>Si cada copia normal del gen aportara la mitad de la actividad, el heterocigoto *1/*2 tendría solo un poco más de acetaldehído que *1/*1. ¿Qué indican los datos?</p>",
+   ["El heterocigoto acumula unas seis veces más acetaldehído que *1/*1: la subunidad mutante «estropea» los complejos que forma con las subunidades normales, así que una sola copia de *2 basta para perder buena parte de la actividad.",
+    "Los tres genotipos se comportan igual; las diferencias son ruido.",
+    "El heterocigoto está justo a la mitad entre *1/*1 y *2/*2, así que cada copia aporta lo mismo.",
+    "El acetaldehído se acumula porque los portadores de *2 absorben más alcohol."],
    0,
-   _fb("el genotipo actúa como una aleatorización natural.", "La lógica requiere que el gen afecte la presión solo a través del consumo de alcohol; esa suposición debe discutirse, pero el diseño evita la confusión típica de los estudios observacionales.",
-       ["«ALDH2 controla la presión»: si así fuera, se violaría el supuesto central del diseño.",
-        "«No hay que medir el alcohol»: hay que verificar que el genotipo sí cambia el consumo.",
-        "«El acetaldehído baja la presión»: la menor presión se explica por beber menos."]))
+   _fb("efecto dominante negativo.", "19 µM frente a 3 µM es unas seis veces más; si la copia normal funcionara sola se esperaría muy poco aumento. Como el tetrámero mezcla subunidades normales y mutantes, la mayoría de los complejos pierde actividad.",
+       ["«Igual»: los picos difieren más de diez veces entre extremos.",
+        "«Justo a la mitad»: la mitad entre 3 y 46 sería ~25 µM; además, la comparación relevante es con *1/*1, y el aumento es mucho mayor que el esperado por «media enzima».",
+        "«Absorben más alcohol»: todos tomaron la misma bebida; lo que cambia es la eliminación del acetaldehído."]))
 
-mc("E1-10 · Genotipo o fenotipo metabólico",
-   "<p>Para individualizar la recomendación de café, ¿qué indicador refleja mejor la actividad real de CYP1A2 de una persona: su genotipo rs762551 o el cociente paraxantina/cafeína en plasma 4–6 h después de una dosis estándar?</p>",
-   ["El genotipo, porque no cambia con el tiempo.",
-    "El cociente metabólico, porque integra el genotipo con factores que inducen o inhiben a CYP1A2 (tabaquismo, anticonceptivos orales, algunos fármacos, embarazo); el genotipo solo predice una parte de esa actividad.",
-    "Ninguno, porque la cafeína no se metaboliza en el hígado.",
-    "Ambos dan exactamente la misma información."],
+mc("E1-10 · Café a las cuatro de la tarde",
+   "<p>Dos estudiantes toman un café con 200 mg de cafeína a las 16:00. La gráfica muestra la cafeína en plasma según su genotipo <em>CYP1A2</em> rs762551.</p>"
+   + _fig("figuras/e1-10_cafeina.png", "Curvas de cafeína en plasma desde las 16:00 hasta las 04:00 para los genotipos CYP1A2 A/A y C/C.")
+   + "<p>¿Qué conclusión se apoya en la gráfica?</p>",
+   ["El C/C absorbe más cafeína, por eso su curva es más alta.",
+    "Ambos alcanzan el mismo máximo, pero el C/C elimina la cafeína más lento: a las 23:00 conserva más del doble que el A/A, lo que puede afectar su sueño; le convendría tomar el café más temprano o una dosis menor.",
+    "El A/A tarda más en eliminar la cafeína porque su curva baja primero.",
+    "Las curvas son iguales; el genotipo no influye en la cafeína."],
    1,
-   _fb("el fenotipo metabólico integra genes y ambiente.", "El tabaco induce fuertemente a CYP1A2 y los anticonceptivos orales la inhiben; dos personas con el mismo genotipo pueden metabolizar la cafeína muy distinto.",
-       ["«No cambia con el tiempo»: es estable, pero no captura inducción ni inhibición.",
-        "«No se metaboliza en el hígado»: CYP1A2 hepática hace la mayor parte de su metabolismo.",
-        "«Misma información»: el genotipo es una causa parcial; el cociente es el resultado medido."]))
+   _fb("misma absorción, eliminación más lenta en C/C.", "La pendiente de bajada refleja el metabolismo hepático (CYP1A2); la altura máxima, la absorción. A la hora de dormir el C/C tiene ~2.8 mg/L frente a ~1.2 mg/L del A/A.",
+       ["«Absorbe más»: los máximos son iguales; la diferencia aparece en la bajada.",
+        "«El A/A tarda más»: que su curva baje primero significa que elimina más rápido.",
+        "«Curvas iguales»: se separan claramente después de las 18:00."]))
 
 # ===========================================================================
 # BLOQUE 2 · CASOS CLÍNICOS (30 pts)

@@ -58,8 +58,23 @@ def texto_plano(html):
     return re.sub(r"<[^>]+>", "", html)
 
 
+IMAGENES = []  # rutas relativas al banco de las imágenes usadas en los reactivos
+
+
+def _con_imagenes(html):
+    """Registra las imágenes locales y las apunta a la carpeta de archivos del curso en Canvas."""
+    def cambiar(m):
+        ruta = m.group(2)
+        if ruta not in IMAGENES:
+            IMAGENES.append(ruta)
+        return f"src={m.group(1)}%24IMS-CC-FILEBASE%24/{ruta}{m.group(1)}"
+    return re.sub(r"src=(['\"])(?!https?:|%24|\$)([^'\"]+)\1", cambiar, html)
+
+
 def mat(contenido, html=True):
     tipo = "text/html" if html else "text/plain"
+    if html:
+        contenido = _con_imagenes(contenido)
     return f'<material><mattext texttype="{tipo}">{escape(contenido)}</mattext></material>'
 
 
@@ -222,7 +237,8 @@ def manifiesto_xml():
             f'<dependency identifierref="{META_ID}"/></resource>'
             f'<resource identifier="{META_ID}" type="associatedcontent/imscc_xmlv1p1/learning-application-resource" '
             f'href="{QUIZ_ID}/assessment_meta.xml"><file href="{QUIZ_ID}/assessment_meta.xml"/></resource>'
-            '</resources></manifest>\n')
+            + "".join(f'<resource identifier="{ident("img", r)}" type="webcontent" href="{escape(r)}"><file href="{escape(r)}"/></resource>' for r in IMAGENES)
+            + '</resources></manifest>\n')
 
 
 def clave_md():
@@ -254,8 +270,11 @@ def clave_md():
 
 def main():
     with zipfile.ZipFile(ZIP_SALIDA, "w", zipfile.ZIP_DEFLATED) as z:
+        evaluacion = evaluacion_xml()  # primero: registra las imágenes que usa
         z.writestr("imsmanifest.xml", manifiesto_xml())
-        z.writestr(f"{QUIZ_ID}/{QUIZ_ID}.xml", evaluacion_xml())
+        z.writestr(f"{QUIZ_ID}/{QUIZ_ID}.xml", evaluacion)
+        for ruta in IMAGENES:
+            z.write(os.path.join(AQUI, ruta), ruta)
         z.writestr(f"{QUIZ_ID}/assessment_meta.xml", meta_xml())
     with open(CLAVE_SALIDA, "w", encoding="utf-8") as f:
         f.write(clave_md())

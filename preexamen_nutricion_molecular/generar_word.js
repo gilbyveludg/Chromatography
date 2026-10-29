@@ -3,7 +3,7 @@
 const fs = require("fs");
 const {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, ShadingType,
-  HeadingLevel, AlignmentType, LevelFormat, BorderStyle, Footer, PageNumber, PageBreak,
+  HeadingLevel, AlignmentType, LevelFormat, BorderStyle, Footer, PageNumber, PageBreak, ImageRun,
 } = require("docx");
 
 const [, , entrada, salida] = process.argv;
@@ -45,6 +45,15 @@ function tabla(filas, anchos) {
 function bloques(lista, extra = {}) {
   const out = [];
   for (const b of lista) {
+    if (b.tipo === "img") {
+      // Ancho máximo 6.3" (605 px a 96 ppp); el alto se escala con la proporción del PNG.
+      const data = fs.readFileSync(b.src);
+      const w = data.readUInt32BE(16), h = data.readUInt32BE(20);
+      const ancho = Math.min(605, w);
+      out.push(new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 60, after: 120 }, keepNext: !!extra.juntar,
+        children: [new ImageRun({ type: "png", data, transformation: { width: ancho, height: Math.round((h * ancho) / w) }, altText: { title: "Figura", description: b.alt, name: "figura" } })] }));
+      continue;
+    }
     if (b.tipo === "tabla") {
       out.push(tabla(b.filas));
       out.push(p([], { spacing: { after: 60 } }));
@@ -53,7 +62,7 @@ function bloques(lista, extra = {}) {
     } else if (b.lista) {
       out.push(new Paragraph({ numbering: { reference: b.lista === "num" ? "numeros" : "vinetas", level: 0 }, children: runs(b.runs, extra), spacing: { after: 60 } }));
     } else {
-      out.push(p(runs(b.runs, extra)));
+      out.push(p(runs(b.runs, extra), extra.juntar ? { keepNext: true } : {}));
     }
   }
   return out;
@@ -73,7 +82,8 @@ const tituloReactivo = (r, extra = "") => new Paragraph({
 
 // ---------------------------------------------------------------- examen
 function pregunta(r) {
-  const out = [tituloReactivo(r), ...bloques(r.enunciado)];
+  // El enunciado (texto y figura) se mantiene en la misma página que el inicio de las opciones.
+  const out = [tituloReactivo(r), ...bloques(r.enunciado, { juntar: true })];
   if (r.tipo === "mc" || r.tipo === "ma") {
     if (r.tipo === "ma") out.push(p([texto("Marca todas las correctas.", { italics: true, color: GRIS, size: 20 })]));
     r.opciones.forEach((op, i) => out.push(new Paragraph({

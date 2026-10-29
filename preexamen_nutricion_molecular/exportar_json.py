@@ -9,7 +9,7 @@ import re
 import sys
 from html.parser import HTMLParser
 
-from generar_qti import banco, puntos_totales, LIMITE_MIN
+from generar_qti import AQUI, banco, puntos_totales, LIMITE_MIN
 
 
 class Bloques(HTMLParser):
@@ -53,6 +53,10 @@ class Bloques(HTMLParser):
             self.estilo.add(tag)
         elif tag == "code":
             self.estilo.add("m")
+        elif tag == "img":
+            self._vaciar()
+            a = dict(attrs)
+            self.bloques.append({"tipo": "img", "src": os.path.join(AQUI, a["src"]), "alt": a.get("alt", "")})
         elif tag == "br" and self.celda is None:
             self._vaciar()
         if tag == "th":
